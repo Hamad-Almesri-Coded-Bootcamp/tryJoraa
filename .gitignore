@@ -1,0 +1,21 @@
+# Secrets — never commit a real key. See docs/security.md (Task C2).
+.env
+.env.*
+!.env.example
+
+# Supabase local state
+supabase/.branches
+supabase/.temp
+supabase/.env
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+.vercel/
+
+# Editor and OS noise
+.DS_Store
+.idea/
+.vscode/
+*.log
