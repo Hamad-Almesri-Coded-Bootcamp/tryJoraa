@@ -32,6 +32,11 @@ it is used. Client validation is the message; the constraint is the guarantee.
 | A1.2 | Migration `..._input_limits.sql` — `char_length` CHECKs on every user-writable text column across the ten tables, plus `civil_id ~ '^\d{12}$'` | SE-5 | migration applies; 5,000-char insert raises `check_violation` |
 | A1.3 | Harden `handle_new_user()` — refuse over-long or malformed metadata instead of copying it | SE-5 | the console bypass above returns an error and creates no row |
 | A1.4 | `src/lib/validation/prescriptions.ts` — the schema B's form imports, limits from A1.1 | SE-5, FE-3 | `npm run build`; handed to B |
+| A1.5 | `verify-rls.ts` probe 8 — the same refusals asserted over PostgREST with the anon key, so SE-5 cannot silently regress | SE-5 | `npm run verify:rls` (needs the live project) |
+
+**Status.** A1.1–A1.5 written, `npm run build`, `npm run lint` and `tsc --noEmit`
+all clean, PR #3 open. A1.2/A1.3 proved on a scratch project (8/8); probe 8 is
+unrun here because `verify:rls` needs the live project's four test accounts.
 
 **Done when:** the 5,000-character paste is refused with a message, the app does
 not freeze, and no row is created — *and* the same paste sent straight to
