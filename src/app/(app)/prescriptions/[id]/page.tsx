@@ -69,7 +69,7 @@ export default async function PrescriptionPage({ params }: { params: Promise<{ i
   const now = new Date()
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
   const [{ data: doses }, { data: week }, { data: forecast }] = await Promise.all([
-    supabase.from('doses').select('id, scheduled_at, status').eq('prescription_id', rx.id).order('scheduled_at', { ascending: false }).limit(30).returns<Dose[]>(),
+    supabase.from('doses').select('id, scheduled_at, status').eq('prescription_id', rx.id).lte('scheduled_at', now.toISOString()).order('scheduled_at', { ascending: false }).limit(30).returns<Dose[]>(), // history: doses up to now, newest first
     supabase.from('doses').select('id, scheduled_at, status').eq('prescription_id', rx.id).gte('scheduled_at', weekAgo).lte('scheduled_at', now.toISOString()).returns<Dose[]>(),
     supabase.from('depletion_forecast').select('runs_out_on').eq('prescription_id', rx.id).maybeSingle<Forecast>(),
   ])

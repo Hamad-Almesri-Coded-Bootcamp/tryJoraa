@@ -17,6 +17,7 @@ export default async function HistoryPage() {
   const { data: rows, error } = await supabase
     .from('audit_log')
     .select('id, at, actor_id, actor_role, run_id, patient_id, table_name, row_id, action, before, after')
+      .or('actor_role.neq.system,table_name.neq.doses,action.neq.insert') // hide the schedule generator's own inserts
     .order('at', { ascending: false })
     .limit(100)
     .returns<AuditRowData[]>()

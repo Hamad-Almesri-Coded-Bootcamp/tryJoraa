@@ -69,7 +69,7 @@ export function DoseCard({ t, dose, now, readOnly }: { t: Dictionary; dose: Dose
         </div>
         {missed && now && (
           <StatusPill tone="alert" className="shrink-0 px-0 text-end whitespace-normal">
-            {t.dashboard.notTaken} <span dir="ltr">{fmtTime(now, t.locale)}</span>
+            {t.dashboard.notTaken}&nbsp;<span dir="ltr">{fmtTime(now, t.locale)}</span>
           </StatusPill>
         )}
         {!open && !missed && <StatusPill className="shrink-0">{t.dose[dose.status]}</StatusPill>}
