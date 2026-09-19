@@ -3,8 +3,12 @@
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { signUpSchema, firstIssue } from '@/lib/validation/auth'
+import { signUpSchema } from '@/lib/validation/auth'
+import { firstIssueOf, issueMessage } from '@/components/formIssue'
 import type { Dictionary } from '@/i18n'
+import { Field } from '@/components/ui/Field'
+import { Button } from '@/components/ui/Button'
+import { FormStatus } from '@/components/ui/bits'
 
 type State = { kind: 'idle' } | { kind: 'loading' } | { kind: 'error'; message: string } | { kind: 'success' }
 
@@ -21,7 +25,12 @@ export function SignUpForm({ t }: { t: Dictionary }) {
       full_name: form.get('full_name'),
       civil_id: form.get('civil_id'),
     })
-    if (!parsed.success) return setState({ kind: 'error', message: firstIssue(parsed.error) })
+    if (!parsed.success) {
+      const i = firstIssueOf(parsed.error)
+      if (i.path === 'civil_id') return setState({ kind: 'error', message: t.auth.civilIdInvalid })
+      const label = i.path === 'email' ? t.auth.email : i.path === 'password' ? t.auth.password : t.auth.fullName
+      return setState({ kind: 'error', message: issueMessage(t, label, i.code) })
+    }
 
     setState({ kind: 'loading' })
     const supabase = createClient()
@@ -33,7 +42,7 @@ export function SignUpForm({ t }: { t: Dictionary }) {
     })
     if (error) return setState({ kind: 'error', message: error.message })
     if (!data.session) {
-      // email confirmation is on in the project: sign in explicitly
+      // email confirmation may be on in the project: sign in explicitly
       const { error: e2 } = await supabase.auth.signInWithPassword({ email: parsed.data.email, password: parsed.data.password })
       if (e2) return setState({ kind: 'error', message: e2.message })
     }
@@ -43,28 +52,23 @@ export function SignUpForm({ t }: { t: Dictionary }) {
   }
 
   const busy = state.kind === 'loading' || state.kind === 'success'
-  const input = 'rounded-md border border-slate-300 px-3 py-3 text-base'
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
-      <label className="flex flex-col gap-1 text-sm text-slate-700">{t.auth.fullName}
-        <input name="full_name" type="text" autoComplete="name" required minLength={2} maxLength={80} className={input} />
-      </label>
-      <label className="flex flex-col gap-1 text-sm text-slate-700">{t.auth.civilId}
-        <input name="civil_id" type="text" inputMode="numeric" pattern="\d{12}" required maxLength={12} className={input} />
-      </label>
-      <label className="flex flex-col gap-1 text-sm text-slate-700">{t.auth.email}
-        <input name="email" type="email" autoComplete="email" required maxLength={254} className={input} />
-      </label>
-      <label className="flex flex-col gap-1 text-sm text-slate-700">{t.auth.password}
-        <input name="password" type="password" autoComplete="new-password" required minLength={8} maxLength={72} className={input} />
-      </label>
-      <button type="submit" disabled={busy} className="rounded-lg bg-emerald-700 px-4 py-3 text-base font-medium text-white disabled:opacity-60">
-        {state.kind === 'loading' ? t.auth.creating : t.auth.submit}
-      </button>
-      <p role="status" aria-live="polite" className={`min-h-6 text-sm ${state.kind === 'error' ? 'text-red-700' : 'text-emerald-800'}`}>
-        {state.kind === 'error' && state.message}
-        {state.kind === 'success' && t.auth.created}
-      </p>
+    <form onSubmit={onSubmit} className="flex flex-col gap-3" noValidate>
+      <div className="flex flex-col gap-3 md:flex-row">
+        <Field className="md:flex-1" label={t.auth.fullName} name="full_name" type="text" autoComplete="name" required minLength={2} placeholder={t.auth.fullNameHint} />
+        <Field className="md:flex-1" label={t.auth.civilId} name="civil_id" type="text" inputMode="numeric" pattern="\d{12}" required placeholder={t.auth.civilIdHint} dirLtr />
+      </div>
+      <Field label={t.auth.email} name="email" type="email" autoComplete="email" required placeholder={t.auth.emailHint} dirLtr />
+      <Field label={t.auth.password} name="password" type="password" autoComplete="new-password" required minLength={8} placeholder="••••••••" dirLtr />
+      <Button type="submit" disabled={busy}>{state.kind === 'loading' ? t.auth.creating : t.auth.signUpSubmit}</Button>
+      <FormStatus
+        state={
+          state.kind === 'loading' ? { kind: 'loading', message: t.auth.creating }
+          : state.kind === 'error' ? { kind: 'error', message: state.message }
+          : state.kind === 'success' ? { kind: 'success', message: t.auth.created }
+          : { kind: 'idle' }
+        }
+      />
     </form>
   )
 }

@@ -1,0 +1,16 @@
+# Memory — Lane B
+
+One line per decision, dated, never deleted. `CLAUDE.md` → Memory.
+
+- 2026-09-19 · Design imported from the Claude Design project `ee786794-f18a-437e-bd4f-e43bf1c0f30b` through the DesignSync tool (the `claude_design` MCP is not configured on this machine). The project has no token file; the design system is the wireframe's five-colour legend and its repeated inline styles, written once into `src/styles/tokens.css` and inventoried in `src/styles/README.md`.
+- 2026-09-19 · Type floor: every board value under 12px renders at 12px, 12–12.5 at 13, 13–14 at 14; tap targets floor at 44px. Applied through tokens, never per screen.
+- 2026-09-19 · Fonts are IBM Plex Sans + IBM Plex Sans Arabic via `next/font/google`; the Arabic face is already in the board's stack, so nothing was substituted.
+- 2026-09-19 · Route renames from the board to D29: `/doctor/prescribe` → `/doctor/prescriptions/new`, `/doctor/drafted` → `/doctor/medications`. `/doctor/alerts/[id]` has no D29 route and is not built as one; an inline detail on `/doctor/alerts` is proposed to the lead.
+- 2026-09-19 · Board sample data (Fatimah Al-Otaibi, Abdulaziz Al-Rashidi, levothyroxine × calcium carbonate) does not match the seed (Fahad Al-Kandari, Mariam Al-Rashidi, Yousef Al-Enezi, Dr Noura Al-Sabah, levothyroxine × ferrous sulfate). Screens render seed rows; the board's data is illustrative.
+- 2026-09-19 · Source badge: public = navy text with 1px navy outline; private = white on soft navy; no sector = muted outline. From artboards 5a/5c/10.
+- 2026-09-19 · Run-out card shows `depletion_forecast.runs_out_on` only; "days left" is arithmetic and stays out of components (D23) unless Lane A adds a column to the view.
+- 2026-09-19 · Form writes are server actions colocated with their page (fork option b, pending the lead's D-number); schemas colocated in `schema.ts` until Lane A's `src/lib/validation` versions land. Mark taken / Skip writes `doses` from the client through the `dose_update` policy — no typed field, so no schema.
+- 2026-09-19 · Lane evidence for verify:ui: `VERIFY_UI_TARGET=http://localhost:3000 npm run verify:ui` runs the same spec against a local `next start`; localhost only, opt-in, not the gate. The boss's run against PUBLIC_SITE_URL stays the gate.
+- 2026-09-19 · verify:ui never waits for `networkidle`: Next keeps prefetching on signed-in pages and Playwright's wait has no timeout, so the cross-account probe hung 120 s. It waits for DOMContentLoaded and `document.fonts.ready` instead.
+- 2026-09-19 · The app bar shows the section title (Dashboard, Prescriptions, Patients…); detail pages render the medicine or patient name as their own h1 with a back chevron in the bar. The board draws the entity name in the bar, but App Router layouts cannot read a page's data without a client store.
+- 2026-09-19 · Never run `npm run build` while a local `next start` is serving from the same `.next`: the build swaps the chunk hashes, the running server keeps referencing the old CSS file, the stylesheet request returns 500 and every screenshot comes out unstyled. Lane evidence is always build → start → verify:ui → stop, in sequence, with no subagent building at the same time.

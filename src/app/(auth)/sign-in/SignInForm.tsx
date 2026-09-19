@@ -3,11 +3,16 @@
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { signInSchema, firstIssue } from '@/lib/validation/auth'
+import { signInSchema } from '@/lib/validation/auth'
+import { firstIssueOf, issueMessage } from '@/components/formIssue'
 import type { Dictionary } from '@/i18n'
+import { Field } from '@/components/ui/Field'
+import { Button } from '@/components/ui/Button'
+import { FormStatus } from '@/components/ui/bits'
 
 type State = { kind: 'idle' } | { kind: 'loading' } | { kind: 'error'; message: string } | { kind: 'success' }
 
+/** The form state machine every form copies: idle / loading / success / error (FE-3). */
 export function SignInForm({ t }: { t: Dictionary }) {
   const router = useRouter()
   const [state, setState] = useState<State>({ kind: 'idle' })
@@ -16,7 +21,10 @@ export function SignInForm({ t }: { t: Dictionary }) {
     e.preventDefault()
     const form = new FormData(e.currentTarget)
     const parsed = signInSchema.safeParse({ email: form.get('email'), password: form.get('password') })
-    if (!parsed.success) return setState({ kind: 'error', message: firstIssue(parsed.error) })
+    if (!parsed.success) {
+      const i = firstIssueOf(parsed.error)
+      return setState({ kind: 'error', message: issueMessage(t, i.path === 'email' ? t.auth.email : t.auth.password, i.code) })
+    }
 
     setState({ kind: 'loading' })
     const supabase = createClient()
@@ -31,22 +39,18 @@ export function SignInForm({ t }: { t: Dictionary }) {
 
   const busy = state.kind === 'loading' || state.kind === 'success'
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
-        {t.auth.email}
-        <input name="email" type="email" autoComplete="email" required maxLength={254} className="rounded-md border border-slate-300 px-3 py-3 text-base" />
-      </label>
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
-        {t.auth.password}
-        <input name="password" type="password" autoComplete="current-password" required minLength={8} maxLength={72} className="rounded-md border border-slate-300 px-3 py-3 text-base" />
-      </label>
-      <button type="submit" disabled={busy} className="rounded-lg bg-emerald-700 px-4 py-3 text-base font-medium text-white disabled:opacity-60">
-        {state.kind === 'loading' ? t.auth.working : t.auth.submit}
-      </button>
-      <p role="status" aria-live="polite" className={`min-h-6 text-sm ${state.kind === 'error' ? 'text-red-700' : 'text-emerald-800'}`}>
-        {state.kind === 'error' && state.message}
-        {state.kind === 'success' && t.auth.signedIn}
-      </p>
+    <form onSubmit={onSubmit} className="flex flex-col gap-3.5" noValidate>
+      <Field label={t.auth.email} name="email" type="email" autoComplete="email" required placeholder={t.auth.emailHint} dirLtr />
+      <Field label={t.auth.password} name="password" type="password" autoComplete="current-password" required minLength={8} placeholder="••••••••" dirLtr />
+      <Button type="submit" disabled={busy}>{state.kind === 'loading' ? t.auth.working : t.auth.signInSubmit}</Button>
+      <FormStatus
+        state={
+          state.kind === 'loading' ? { kind: 'loading', message: t.auth.working }
+          : state.kind === 'error' ? { kind: 'error', message: state.message }
+          : state.kind === 'success' ? { kind: 'success', message: t.auth.signedIn }
+          : { kind: 'idle' }
+        }
+      />
     </form>
   )
 }

@@ -1,25 +1,71 @@
 @import "tailwindcss";
+@import "../styles/tokens.css";
 
-:root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-}
-
+/*
+ * Tailwind utilities ARE the tokens. Every namespace the board defines is reset
+ * first, so a leftover slate or emerald utility or an arbitrary text-[11px]
+ * generates nothing and the audit grep catches it. Values live only in src/styles/tokens.css.
+ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Arabic", "Noto Naskh Arabic", Tahoma, sans-serif;
+  --color-*: initial;
+  --color-navy: var(--jr-navy);
+  --color-navy-soft: var(--jr-navy-soft);
+  --color-red: var(--jr-red);
+  --color-white: var(--jr-white);
+  --color-surface: var(--jr-surface);
+  --color-line: var(--jr-line);
+  --color-line-strong: var(--jr-line-strong);
+  --color-ink-muted: var(--jr-ink-muted);
+  --color-ink-faint: var(--jr-ink-faint);
+  --color-red-line: var(--jr-red-line);
+  --color-on-navy-muted: var(--jr-on-navy-muted);
+  --color-on-navy-chip: var(--jr-on-navy-chip);
+  --color-transparent: transparent;
+
+  --font-sans: var(--jr-font-sans);
+
+  --text-*: initial;
+  --text-xs: var(--jr-text-xs);     --text-xs--line-height: var(--jr-text-xs-lh);
+  --text-sm: var(--jr-text-sm);     --text-sm--line-height: var(--jr-text-sm-lh);
+  --text-base: var(--jr-text-base); --text-base--line-height: var(--jr-text-base-lh);
+  --text-lg: var(--jr-text-lg);     --text-lg--line-height: var(--jr-text-lg-lh);
+  --text-xl: var(--jr-text-xl);     --text-xl--line-height: var(--jr-text-xl-lh);
+  --text-2xl: var(--jr-text-2xl);   --text-2xl--line-height: var(--jr-text-2xl-lh);
+  --text-3xl: var(--jr-text-3xl);   --text-3xl--line-height: var(--jr-text-3xl-lh);
+  --tracking-label: var(--jr-tracking-label);
+
+  --radius-*: initial;
+  --radius-sm: var(--jr-radius-sm);
+  --radius-md: var(--jr-radius-md);
+  --radius-lg: var(--jr-radius-lg);
+  --radius-pill: var(--jr-radius-pill);
+
+  --spacing-tap: var(--jr-size-tap);
+  --spacing-cta: var(--jr-size-cta);
+  --spacing-dot: var(--jr-size-dot);
+  --spacing-sidebar: var(--jr-size-sidebar);
+  --container-patient: var(--jr-size-patient-col);
+  --container-doctor: var(--jr-size-doctor-col);
+  --container-form: var(--jr-size-form-col);
+  --container-auth: var(--jr-size-auth-card);
+
+  --shadow-*: initial;
+  --shadow-card: var(--jr-shadow-card);
+  --shadow-soft: var(--jr-shadow-soft);
+
+  --animate-spin: var(--jr-spin);
 }
 
 html, body { height: 100%; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  font-size: 16px;
+  background: var(--jr-surface);
+  color: var(--jr-navy);
+  font-family: var(--jr-font-sans);
+  font-size: var(--jr-text-base);
+  line-height: var(--jr-text-base-lh);
   -webkit-text-size-adjust: 100%;
 }
 
-/* nothing under 12px, anywhere (FE-4) */
-.text-xs { font-size: 0.75rem; line-height: 1.25rem; }
+/* directional glyphs flip with the document direction */
+[dir="rtl"] .flip-rtl { transform: scaleX(-1); }

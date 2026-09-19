@@ -19,7 +19,7 @@ sample data. Jur'ah does not give medical advice — always follow your doctor a
 
 ## Live
 
-- App: _public URL, written here on Saturday_
+- App: https://jurah.vercel.app
 - Demo Day: Thursday 24 September 2026, 09:00
 
 ## Stack

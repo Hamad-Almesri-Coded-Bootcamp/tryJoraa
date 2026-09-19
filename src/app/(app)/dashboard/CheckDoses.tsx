@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Dictionary } from '@/i18n'
+import { Button } from '@/components/ui/Button'
+import { RunStatus, ResultPanel, failedReasonOf, type RunResult, type RunStatusKind } from '@/components/RunResult'
 
-type RunRow = { id: string; status: 'queued' | 'running' | 'done' | 'failed'; result: unknown; finished_at: string | null }
+type RunRow = { id: string; status: RunStatusKind; result: RunResult | null; finished_at: string | null }
 type State =
   | { kind: 'idle' }
   | { kind: 'starting' }
@@ -12,7 +14,12 @@ type State =
   | { kind: 'finished'; run: RunRow }
   | { kind: 'error'; message: string }
 
-/** AU-2: start the automation from our front end, watch its status, read the result. */
+/**
+ * AU-2 / AU-6: start the automation from our front end, watch its status, read
+ * the result — on this screen, never in n8n or the database. POST /api/runs
+ * creates the runs row and calls n8n server-side; the browser then polls the
+ * row through Supabase (RLS scopes it) until done or failed.
+ */
 export function CheckDoses({ t }: { t: Dictionary }) {
   const [state, setState] = useState<State>({ kind: 'idle' })
   const timer = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -20,12 +27,18 @@ export function CheckDoses({ t }: { t: Dictionary }) {
   useEffect(() => () => { if (timer.current) clearInterval(timer.current) }, [])
 
   async function start() {
+    if (timer.current) clearInterval(timer.current)
     setState({ kind: 'starting' })
-    const res = await fetch('/api/runs', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ kind: 'check_doses' }),
-    })
+    let res: Response
+    try {
+      res = await fetch('/api/runs', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ kind: 'check_doses' }),
+      })
+    } catch {
+      return setState({ kind: 'error', message: t.dashboard.runError })
+    }
     if (!res.ok) {
       const body = await res.json().catch(() => ({}))
       return setState({ kind: 'error', message: body.error ?? `${t.dashboard.runError} (${res.status})` })
@@ -44,46 +57,33 @@ export function CheckDoses({ t }: { t: Dictionary }) {
       }
     }
     await poll()
-    timer.current = setInterval(poll, 2000)
+    let ticks = 0
+    timer.current = setInterval(async () => {
+      ticks += 1
+      if (ticks > 150) { // five minutes — stop polling and say so (FE-3: never a frozen screen)
+        if (timer.current) clearInterval(timer.current)
+        return setState({ kind: 'error', message: t.dashboard.runError })
+      }
+      await poll()
+    }, 2000)
   }
 
   const busy = state.kind === 'starting' || state.kind === 'polling'
   const run = state.kind === 'polling' || state.kind === 'finished' ? state.run : null
+  const status: RunStatusKind | null = state.kind === 'starting' ? 'queued' : run ? run.status : null
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4">
-      <button
-        type="button"
-        onClick={start}
-        disabled={busy}
-        className="w-full rounded-lg bg-emerald-700 px-4 py-3 text-base font-medium text-white disabled:opacity-60"
-      >
+    <section aria-labelledby="check-doses" className="flex flex-col gap-2.5 pt-1">
+      <h2 id="check-doses" className="sr-only">{t.dashboard.check}</h2>
+      <Button size="cta" onClick={start} disabled={busy}>
         {busy ? t.dashboard.checking : t.dashboard.check}
-      </button>
-      <div role="status" aria-live="polite" className="mt-3 space-y-2 text-sm">
-        {state.kind === 'starting' && <p className="text-slate-600">{t.dashboard.runStarted}</p>}
-        {state.kind === 'error' && <p className="text-red-700">{state.message}</p>}
-        {run && (
-          <>
-            <p>
-              <span className="text-slate-500">{t.dashboard.status}: </span>
-              <span className="font-medium">{t.run[run.status]}</span>
-            </p>
-            {state.kind === 'finished' && (
-              <div>
-                <p className={run.status === 'failed' ? 'text-red-700' : 'text-emerald-800'}>
-                  {run.status === 'failed' ? t.dashboard.runFailed : t.dashboard.runDone}
-                </p>
-                <p className="mt-1 text-slate-500">{t.dashboard.result}:</p>
-                {/* PROVISIONAL rendering — Lane B renders docs/contracts/run-result.example.json properly */}
-                <pre dir="ltr" className="mt-1 max-w-full overflow-x-auto rounded bg-slate-50 p-2 text-xs text-slate-800">
-                  {run.result ? JSON.stringify(run.result, null, 2) : t.dashboard.noResult}
-                </pre>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+      </Button>
+      {state.kind === 'error' && <p role="status" aria-live="polite" className="text-sm text-red">{state.message}</p>}
+      {status && <RunStatus t={t} status={status} failedReason={run ? failedReasonOf(t, run.result) : undefined} />}
+      {state.kind === 'finished' && state.run.status === 'done' && <ResultPanel t={t} result={state.run.result} />}
+      {state.kind === 'finished' && state.run.status === 'failed' && (
+        <Button variant="outline" onClick={start}>{t.dashboard.tryAgain}</Button>
+      )}
     </section>
   )
 }
