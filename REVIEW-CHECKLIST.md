@@ -51,12 +51,12 @@ ALL = every one of the three.
 
 ## Area 03 — Security (6)
 
-- [ ] **SE-1** · A — Row level security is on, and a second account cannot read the first account's rows.
+- [x] **SE-1** · A — Row level security is on, and a second account cannot read the first account's rows.
   - *Test:* Two accounts, two private windows, side by side. Account B opens account A's record ID in the address bar and gets nothing back. Do it in front of the judge.
   - *Our gate:* `npm run verify:rls` must exit 0. Run it nightly and before every merge.
-- [ ] **SE-2** · A — No key, token or password appears anywhere in the repository, including the commit history.
+- [x] **SE-2** · A — No key, token or password appears anywhere in the repository, including the commit history.
   - *Test:* Open the repo and search it for key, secret, password, token and eyJ. Then open the history of any file that ever held configuration. Nothing comes back.
-- [ ] **SE-3** · A — Your app never stores a password itself, and no password is ever shown on any screen or in any table.
+- [x] **SE-3** · A — Your app never stores a password itself, and no password is ever shown on any screen or in any table.
   - *Test:* Open the users table in front of the judge. There is no readable password column anywhere.
 - [ ] **SE-4** · B — The public URL is HTTPS on every screen, and nothing on the page loads over plain HTTP.
   - *Test:* Look at the address bar on the landing page and on the dashboard. Then open the browser console and check there is no mixed content warning.
@@ -86,9 +86,9 @@ ALL = every one of the three.
 
 ## Area 05 — Ship it and show it (6)
 
-- [ ] **SH-1** · B — The public URL opens for a stranger in a private window, with no login wall on the landing page.
+- [x] **SH-1** · B — The public URL opens for a stranger in a private window, with no login wall on the landing page.
   - *Test:* Private window, paste the URL, do not sign in. You can see what the product is and what it does.
-- [ ] **SH-2** · B — What is live is what is in main. The repository is current, not three days behind the demo.
+- [x] **SH-2** · B — What is live is what is in main. The repository is current, not three days behind the demo.
   - *Test:* Change one word on a page, push it, and watch the live site change while the judge watches.
 - [ ] **SH-3** · B — The repository front page says what the product does in three lines, and names the people with the part each one owned.
   - *Test:* Open the repo. Read the front page. Names, jobs, three lines about the product.
