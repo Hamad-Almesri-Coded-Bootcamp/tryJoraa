@@ -1,0 +1,24 @@
+# Jur'ah — Supabase CLI project file.
+#
+# Deliberately minimal, and that is the point.
+#
+# `supabase init` writes ~400 lines of defaults here: auth settings, SMTP,
+# storage limits, JWT expiry, the lot. Do not paste those in. When the GitHub
+# integration creates a preview branch it clones the base project's settings and
+# then applies this file ON TOP. Any default sitting in here silently overwrites
+# the real project's configuration on every branch — so a stray
+# `enable_confirmations = false` would quietly turn off email confirmation on a
+# branch and nobody would notice until a judge signed up.
+#
+# One key, nothing else. Add a setting here only when you intend every preview
+# branch to differ from production in exactly that way, and say why in a comment.
+#
+# What this file is actually for:
+#   * `npx supabase db push` works without --project-ref once linked
+#   * `supabase link --project-ref <ref>` has a project directory to link
+#   * the CLI and the GitHub integration find `migrations/` and `seed.sql`
+#
+# The linked project ref is NOT stored here — it goes in supabase/.temp/, which
+# is gitignored. The live project is `frvubflbpujwuhsxweue`.
+
+project_id = "jurah"
