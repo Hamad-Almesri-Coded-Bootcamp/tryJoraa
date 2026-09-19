@@ -25,7 +25,8 @@ done <<< "$staged"
 
 # --- 2. no secrets in content ------------------------------------------------
 # Files allowed to mention these strings because they exist to talk about them.
-allow='^(scripts/verify-rls\.ts|\.githooks/pre-commit|\.env\.example|CLAUDE\.md|REVIEW-CHECKLIST\.md|SETUP\.md)$'
+# package-lock.json: npm sha512 integrity hashes are base64 and contain 'eyJ' by chance.
+allow='^(package-lock\.json|scripts/verify-rls\.ts|\.githooks/pre-commit|\.env\.example|CLAUDE\.md|REVIEW-CHECKLIST\.md|SETUP\.md)$'
 
 patterns=(
   'eyJ[A-Za-z0-9_-]\{20,\}'                 # a JWT — Supabase keys look like this

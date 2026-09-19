@@ -6,20 +6,34 @@
 # local tool state (holds session tokens)
 .gstack/
 .logs/
+.vercel
 
 # gitignored output of verify:ui
 docs/evidence/
 
-# build
+# dependencies
 node_modules/
+/.pnp
+.pnp.*
+
+# build
 .next/
 out/
+build/
 *.tsbuildinfo
 next-env.d.ts
+coverage/
 
 # playwright
 test-results/
 playwright-report/
 
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
 # os
 .DS_Store
+*.pem
