@@ -9,10 +9,10 @@ import { AddPrescriptionForm } from './AddPrescriptionForm'
 export default async function AddPrescriptionPage() {
   const t = await getDictionary()
   return (
-    <>
+    <div className="lg:mx-auto lg:w-full lg:max-w-form">
       <h1 className="sr-only">{t.add.title}</h1>
       <p className="text-sm text-ink-muted">{t.add.intro}</p>
       <AddPrescriptionForm t={t} />
-    </>
+    </div>
   )
 }

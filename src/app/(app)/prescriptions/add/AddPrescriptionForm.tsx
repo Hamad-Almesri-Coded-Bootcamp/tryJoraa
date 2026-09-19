@@ -13,7 +13,21 @@ import { addPrescription } from './actions'
 type State = { kind: 'idle' } | { kind: 'loading' } | { kind: 'error'; message: string } | { kind: 'success' }
 
 /** The form state machine every form copies: idle / loading / success / error (FE-3). */
-export function AddPrescriptionForm({ t }: { t: Dictionary }) {
+type Props = {
+  t: Dictionary
+  /** Pre-filled values (a draft's `extracted`, same column names). */
+  initial?: Record<string, string | number | null | undefined>
+  /** Per-field confidence from the extraction agent, 0–1 or 0–100; shown under the field, never acted on. */
+  confidence?: Record<string, number>
+  /** The server action that receives the validated object. Defaults to adding a patient-entered prescription. */
+  action?: (input: unknown) => Promise<{ ok: true; id: string } | { ok: false; error: string; path?: string; code?: IssueCode }>
+  labels?: { submit: string; saving: string; saved: string }
+  successHref?: string
+  /** Rendered after the status line — a secondary action such as Discard draft. */
+  extra?: React.ReactNode
+}
+
+export function AddPrescriptionForm({ t, initial = {}, confidence = {}, action = addPrescription, labels, successHref = '/prescriptions', extra }: Props) {
   const router = useRouter()
   const [state, setState] = useState<State>({ kind: 'idle' })
   const [fieldError, setFieldError] = useState<{ path: string; message: string } | null>(null)
@@ -28,13 +42,13 @@ export function AddPrescriptionForm({ t }: { t: Dictionary }) {
     setFieldError(null)
     setState({ kind: 'loading' })
 
-    const result = await addPrescription(obj)
+    const result = await action(obj)
     if (!result.ok) {
       if (result.code) return fail({ path: result.path ?? '', code: result.code })
       return setState({ kind: 'error', message: t.add.failed })
     }
     setState({ kind: 'success' })
-    router.push('/prescriptions')
+    router.push(successHref)
     router.refresh()
   }
 
@@ -54,15 +68,23 @@ export function AddPrescriptionForm({ t }: { t: Dictionary }) {
 
   const busy = state.kind === 'loading' || state.kind === 'success'
   const errAt = (path: string) => (fieldError?.path === path ? fieldError.message : undefined)
+  const v = (k: string) => { const x = initial[k]; return x === null || x === undefined ? undefined : String(x) }
+  const hint = (k: string) => {
+    const c = confidence[k]
+    if (c === undefined || c === null || Number.isNaN(Number(c))) return undefined
+    const pct = Number(c) <= 1 ? Math.round(Number(c) * 100) : Math.round(Number(c))
+    return `${t.drafts.confidence} ${pct}%`
+  }
+  const L = labels ?? { submit: t.add.submit, saving: t.add.saving, saved: t.add.saved }
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-3.5" noValidate>
-      <Field label={t.add.generic} name="drug_name_generic" required placeholder={t.add.genericHint} error={errAt('drug_name_generic')} />
-      <Field label={t.add.brand} name="drug_name_brand" optional={t.add.optional} error={errAt('drug_name_brand')} />
+      <Field label={t.add.generic} name="drug_name_generic" hint={hint('drug_name_generic')} defaultValue={v('drug_name_generic')} required placeholder={t.add.genericHint} error={errAt('drug_name_generic')} />
+      <Field label={t.add.brand} name="drug_name_brand" hint={hint('drug_name_brand')} defaultValue={v('drug_name_brand')} optional={t.add.optional} error={errAt('drug_name_brand')} />
 
       <div className="flex gap-2">
-        <Field className="flex-1" label={t.add.strengthValue} name="strength_value" type="number" step="any" min={0} required inputMode="decimal" dirLtr error={errAt('strength_value')} />
-        <SelectField className="flex-1" label={t.add.strengthUnit} name="strength_unit" defaultValue="mg" error={errAt('strength_unit')}>
+        <Field className="flex-1" label={t.add.strengthValue} name="strength_value" hint={hint('strength_value')} defaultValue={v('strength_value')} type="number" step="any" min={0} required inputMode="decimal" dirLtr error={errAt('strength_value')} />
+        <SelectField className="flex-1" label={t.add.strengthUnit} name="strength_unit" defaultValue={v('strength_unit') ?? 'mg'} hint={hint('strength_unit')} error={errAt('strength_unit')}>
           {Object.entries(t.unit).map(([value, label]) => (
             <option key={value} value={value}>{label}</option>
           ))}
@@ -70,61 +92,63 @@ export function AddPrescriptionForm({ t }: { t: Dictionary }) {
       </div>
 
       <div className="flex gap-2">
-        <Field className="flex-1" label={t.add.dose} name="dose_per_administration" type="number" step="any" min={0} required inputMode="decimal" dirLtr placeholder={t.add.doseHint} error={errAt('dose_per_administration')} />
-        <Field className="flex-1" label={t.add.frequency} name="frequency_per_day" type="number" min={1} max={6} step={1} required inputMode="numeric" dirLtr error={errAt('frequency_per_day')} />
+        <Field className="flex-1" label={t.add.dose} name="dose_per_administration" hint={hint('dose_per_administration')} defaultValue={v('dose_per_administration')} type="number" step="any" min={0} required inputMode="decimal" dirLtr placeholder={t.add.doseHint} error={errAt('dose_per_administration')} />
+        <Field className="flex-1" label={t.add.frequency} name="frequency_per_day" hint={hint('frequency_per_day')} defaultValue={v('frequency_per_day')} type="number" min={1} max={6} step={1} required inputMode="numeric" dirLtr error={errAt('frequency_per_day')} />
       </div>
 
       <div className="flex gap-2">
-        <Field className="flex-1" label={t.add.duration} name="duration_days" type="number" min={1} max={365} step={1} required inputMode="numeric" dirLtr error={errAt('duration_days')} />
-        <SelectField className="flex-1" label={t.add.pattern} name="dosing_pattern" defaultValue="daily" error={errAt('dosing_pattern')}>
+        <Field className="flex-1" label={t.add.duration} name="duration_days" hint={hint('duration_days')} defaultValue={v('duration_days')} type="number" min={1} max={365} step={1} required inputMode="numeric" dirLtr error={errAt('duration_days')} />
+        <SelectField className="flex-1" label={t.add.pattern} name="dosing_pattern" defaultValue={v('dosing_pattern') ?? 'daily'} hint={hint('dosing_pattern')} error={errAt('dosing_pattern')}>
           {Object.entries(t.pattern).map(([value, label]) => (
             <option key={value} value={value}>{label}</option>
           ))}
         </SelectField>
       </div>
 
-      <Field label={t.add.startDate} name="start_date" type="date" required dirLtr defaultValue={new Date().toISOString().slice(0, 10)} error={errAt('start_date')} />
+      <Field label={t.add.startDate} name="start_date" hint={hint('start_date')} type="date" required dirLtr defaultValue={v('start_date') ?? new Date().toISOString().slice(0, 10)} error={errAt('start_date')} />
 
       <ChipGroup
         label={t.add.route}
         name="route"
-        defaultValue="oral"
+        defaultValue={v('route') ?? 'oral'}
         options={Object.entries(t.route).map(([value, label]) => ({ value, label }))}
         error={errAt('route')}
       />
 
-      <Field label={t.add.foodTiming} name="food_timing" optional={t.add.optional} placeholder={t.add.foodTimingHint} error={errAt('food_timing')} />
-      <Field label={t.add.indication} name="indication" optional={t.add.optional} error={errAt('indication')} />
-      <TextareaField label={t.add.notes} name="notes" optional={t.add.optional} error={errAt('notes')} />
+      <Field label={t.add.foodTiming} name="food_timing" hint={hint('food_timing')} defaultValue={v('food_timing')} optional={t.add.optional} placeholder={t.add.foodTimingHint} error={errAt('food_timing')} />
+      <Field label={t.add.indication} name="indication" hint={hint('indication')} defaultValue={v('indication')} optional={t.add.optional} error={errAt('indication')} />
+      <TextareaField label={t.add.notes} name="notes" hint={hint('notes')} defaultValue={v('notes')} optional={t.add.optional} error={errAt('notes')} />
 
       <div className="flex gap-2">
-        <Field className="flex-1" label={t.add.dispenseDate} name="dispense_date" type="date" optional={t.add.optional} dirLtr error={errAt('dispense_date')} />
-        <Field className="flex-1" label={t.add.quantityDispensed} name="total_quantity_dispensed" type="number" step="any" min={0} optional={t.add.optional} inputMode="decimal" dirLtr error={errAt('total_quantity_dispensed')} />
+        <Field className="flex-1" label={t.add.dispenseDate} name="dispense_date" hint={hint('dispense_date')} defaultValue={v('dispense_date')} type="date" optional={t.add.optional} dirLtr error={errAt('dispense_date')} />
+        <Field className="flex-1" label={t.add.quantityDispensed} name="total_quantity_dispensed" hint={hint('total_quantity_dispensed')} defaultValue={v('total_quantity_dispensed')} type="number" step="any" min={0} optional={t.add.optional} inputMode="decimal" dirLtr error={errAt('total_quantity_dispensed')} />
       </div>
 
       <div className="flex gap-2">
-        <Field className="flex-1" label={t.add.unitsPerPackage} name="units_per_package" type="number" min={1} step={1} optional={t.add.optional} inputMode="numeric" dirLtr error={errAt('units_per_package')} />
-        <Field className="flex-1" label={t.add.brandDispensed} name="brand_dispensed" optional={t.add.optional} error={errAt('brand_dispensed')} />
+        <Field className="flex-1" label={t.add.unitsPerPackage} name="units_per_package" hint={hint('units_per_package')} defaultValue={v('units_per_package')} type="number" min={1} step={1} optional={t.add.optional} inputMode="numeric" dirLtr error={errAt('units_per_package')} />
+        <Field className="flex-1" label={t.add.brandDispensed} name="brand_dispensed" hint={hint('brand_dispensed')} defaultValue={v('brand_dispensed')} optional={t.add.optional} error={errAt('brand_dispensed')} />
       </div>
 
-      <Field label={t.add.facility} name="source_facility" required placeholder={t.add.facilityHint} error={errAt('source_facility')} />
+      <Field label={t.add.facility} name="source_facility" hint={hint('source_facility')} defaultValue={v('source_facility')} required placeholder={t.add.facilityHint} error={errAt('source_facility')} />
 
       <ChipGroup
         label={t.add.sector}
         name="source_sector"
+        defaultValue={v('source_sector')}
         options={Object.entries(t.sector).map(([value, label]) => ({ value, label }))}
         error={errAt('source_sector')}
       />
 
-      <Button type="submit" disabled={busy}>{state.kind === 'loading' ? t.add.saving : t.add.submit}</Button>
+      <Button type="submit" disabled={busy}>{state.kind === 'loading' ? L.saving : L.submit}</Button>
       <FormStatus
         state={
           state.kind === 'loading' ? { kind: 'loading', message: t.add.saving }
           : state.kind === 'error' ? { kind: 'error', message: state.message }
-          : state.kind === 'success' ? { kind: 'success', message: t.add.saved }
+          : state.kind === 'success' ? { kind: 'success', message: L.saved }
           : { kind: 'idle' }
         }
       />
+      {extra}
     </form>
   )
 }

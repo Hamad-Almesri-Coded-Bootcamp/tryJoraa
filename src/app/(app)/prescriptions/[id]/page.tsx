@@ -83,45 +83,51 @@ export default async function PrescriptionPage({ params }: { params: Promise<{ i
         {rx.drug_name_brand && <span className="font-normal text-ink-muted"> ({rx.drug_name_brand})</span>}
       </h1>
 
-      <Card variant="read" className="flex flex-col gap-1.5 text-sm text-navy">
-        <p>{t.rx.dose}: <b dir="ltr">{strength} × {fmtNumber(rx.dose_per_administration, t.locale)}</b></p>
-        <p>{t.rx.frequency}: <span dir="ltr">{rx.frequency_per_day}</span> · {t.pattern[rx.dosing_pattern]} · <span dir="ltr">{rx.duration_days}</span> {t.rx.days}</p>
-        <p>{t.rx.route}: {t.route[rx.route]}{rx.food_timing && <> · {rx.food_timing}</>}</p>
-        {rx.indication && <p>{t.rx.indication}: {rx.indication}</p>}
-        <p>{t.rx.start}: <span dir="ltr">{fmtDate(rx.start_date, t.locale)}</span></p>
-        <p>{t.rx.doctor}: {rx.doctor?.full_name ?? t.rx.noDoctor}</p>
-        {rx.notes && <p className="text-ink-muted">{rx.notes}</p>}
-        <SourceBadge t={t} source={rx.source} facility={rx.source_facility} sector={rx.source_sector} className="mt-1 self-start" />
-      </Card>
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
+        <div className="flex flex-col gap-2.5">
+          <Card variant="read" className="flex flex-col gap-1.5 text-sm text-navy">
+            <p>{t.rx.dose}: <b dir="ltr">{strength} × {fmtNumber(rx.dose_per_administration, t.locale)}</b></p>
+            <p>{t.rx.frequency}: <span dir="ltr">{rx.frequency_per_day}</span> · {t.pattern[rx.dosing_pattern]} · <span dir="ltr">{rx.duration_days}</span> {t.rx.days}</p>
+            <p>{t.rx.route}: {t.route[rx.route]}{rx.food_timing && <> · {rx.food_timing}</>}</p>
+            {rx.indication && <p>{t.rx.indication}: {rx.indication}</p>}
+            <p>{t.rx.start}: <span dir="ltr">{fmtDate(rx.start_date, t.locale)}</span></p>
+            <p>{t.rx.doctor}: {rx.doctor?.full_name ?? t.rx.noDoctor}</p>
+            {rx.notes && <p className="text-ink-muted">{rx.notes}</p>}
+            <SourceBadge t={t} source={rx.source} facility={rx.source_facility} sector={rx.source_sector} className="mt-1 self-start" />
+          </Card>
 
-      <section className="flex flex-col gap-2">
-        <SectionLabel>{t.rx.pastWeek}</SectionLabel>
-        <WeekDots t={t} doses={week ?? []} now={now} />
-      </section>
-
-      {forecast?.runs_out_on && (
-        <Card variant="refusal" className="flex flex-col gap-1">
-          <p className="text-sm font-bold text-navy">{t.rx.runsOut} <span dir="ltr">{fmtDate(forecast.runs_out_on, t.locale, 'long')}</span></p>
-          {rx.total_quantity_dispensed != null && (
-            <p className="text-xs text-ink-muted">{t.rx.dispensed}: <span dir="ltr">{rx.dispense_date ? fmtDate(rx.dispense_date, t.locale) : '—'}</span> · {t.rx.quantity}: <span dir="ltr">{fmtNumber(rx.total_quantity_dispensed, t.locale)}</span></p>
+          {forecast?.runs_out_on && (
+            <Card variant="refusal" className="flex flex-col gap-1">
+              <p className="text-sm font-bold text-navy">{t.rx.runsOut} <span dir="ltr">{fmtDate(forecast.runs_out_on, t.locale, 'long')}</span></p>
+              {rx.total_quantity_dispensed != null && (
+                <p className="text-xs text-ink-muted">{t.rx.dispensed}: <span dir="ltr">{rx.dispense_date ? fmtDate(rx.dispense_date, t.locale) : '—'}</span> · {t.rx.quantity}: <span dir="ltr">{fmtNumber(rx.total_quantity_dispensed, t.locale)}</span></p>
+              )}
+            </Card>
           )}
-        </Card>
-      )}
+        </div>
 
-      <section className="flex flex-col gap-2">
-        <SectionLabel>{t.rx.doses}</SectionLabel>
-        {(doses?.length ?? 0) === 0 && <p className="text-sm text-ink-muted">{t.rx.noDoses}</p>}
-        {doses && doses.length > 0 && (
-          <ul className="divide-y divide-line rounded-md border border-line bg-white">
-            {doses.map((d) => (
-              <li key={d.id} className="flex min-h-tap items-center justify-between gap-3 px-3 py-1.5 text-sm">
-                <span dir="ltr">{fmtDateTime(d.scheduled_at, t.locale)}</span>
-                <StatusPill tone={d.status === 'missed' || d.status === 'skipped' ? 'alert' : 'neutral'}>{t.dose[d.status]}</StatusPill>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        <div className="flex flex-col gap-2.5">
+          <section className="flex flex-col gap-2">
+            <SectionLabel>{t.rx.pastWeek}</SectionLabel>
+            <WeekDots t={t} doses={week ?? []} now={now} />
+          </section>
+
+          <section className="flex flex-col gap-2">
+            <SectionLabel>{t.rx.doses}</SectionLabel>
+            {(doses?.length ?? 0) === 0 && <p className="text-sm text-ink-muted">{t.rx.noDoses}</p>}
+            {doses && doses.length > 0 && (
+              <ul className="divide-y divide-line rounded-md border border-line bg-white">
+                {doses.map((d) => (
+                  <li key={d.id} className="flex min-h-tap items-center justify-between gap-3 px-3 py-1.5 text-sm">
+                    <span dir="ltr">{fmtDateTime(d.scheduled_at, t.locale)}</span>
+                    <StatusPill tone={d.status === 'missed' || d.status === 'skipped' ? 'alert' : 'neutral'}>{t.dose[d.status]}</StatusPill>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+      </div>
     </>
   )
 }

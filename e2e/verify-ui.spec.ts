@@ -34,7 +34,7 @@ mkdirSync(DIR, { recursive: true })
 
 /** Built D29 routes. Dynamic ids are resolved at run time. */
 const PUBLIC_ROUTES = ['/', '/sign-in', '/sign-up']
-const PATIENT_ROUTES = ['/dashboard', '/prescriptions', '/prescriptions/[id]', '/prescriptions/add', '/history']
+const PATIENT_ROUTES = ['/dashboard', '/prescriptions', '/prescriptions/[id]', '/prescriptions/add', '/prescriptions/drafts/[draftId]', '/history']
 const DOCTOR_ROUTES = ['/doctor', '/doctor/patients/add', '/doctor/patients/[id]', '/doctor/prescriptions/new', '/doctor/alerts', '/doctor/medications']
 
 const consoleIssues: string[] = []
@@ -110,6 +110,35 @@ async function firstPrescriptionIdOfA(): Promise<string> {
   return data!.id
 }
 
+/** A's first open draft, created as A if none exists — same precedent as the probe prescription; drafts are patient-only. */
+async function firstDraftIdOfA(): Promise<{ id: string; created: boolean }> {
+  const sb = anonClient()
+  const { error } = await sb.auth.signInWithPassword(A)
+  if (error) throw error
+  let created = false
+  let { data } = await sb.from('prescription_drafts').select('id').is('accepted_at', null).limit(1).maybeSingle()
+  if (!data) {
+    created = true
+    const ins = await sb.from('prescription_drafts').insert({
+      patient_id: (await sb.auth.getUser()).data.user!.id, source_image: null,
+      extracted: { drug_name_generic: 'UI probe draft', strength_value: 5, strength_unit: 'mg', dose_per_administration: 1, frequency_per_day: 1, duration_days: 1, dosing_pattern: 'daily', route: 'oral', source_facility: 'UI probe clinic', source_sector: 'private' },
+      confidence: { drug_name_generic: 0.9 },
+    }).select('id').single()
+    if (ins.error) throw ins.error
+    data = ins.data
+  }
+  await sb.auth.signOut({ scope: 'local' })
+  return { id: data!.id, created }
+}
+
+/** The walk removes the probe draft it created, so no test row lingers on A's list. */
+async function removeDraftAsA(id: string) {
+  const sb = anonClient()
+  await sb.auth.signInWithPassword(A)
+  await sb.from('prescription_drafts').delete().eq('id', id)
+  await sb.auth.signOut({ scope: 'local' })
+}
+
 /** The id of the patient the linked doctor may open (A), as the doctor sees it through doctor_patients. */
 async function linkedPatientId(): Promise<string | null> {
   const sb = anonClient()
@@ -155,12 +184,14 @@ for (const lang of ['ar', 'en'] as const) {
 
   test(`patient routes at 390px as A, ${lang}`, async ({ page }) => {
     const rxId = await firstPrescriptionIdOfA()
+    const draft = await firstDraftIdOfA()
     await signIn(page, A, lang)
     for (const r of PATIENT_ROUTES) {
-      const url = r.replace('[id]', rxId)
+      const url = r.replace('[draftId]', draft.id).replace('[id]', rxId)
       await page.goto(url)
-      await assertShot(page, `${lang}-patient${r.replaceAll('/', '-').replace('[id]', 'id')}`)
+      await assertShot(page, `${lang}-patient${r.replaceAll('/', '-').replace('[draftId]', 'id').replace('[id]', 'id')}`)
     }
+    if (draft.created) await removeDraftAsA(draft.id)
     await signOut(page)
   })
 

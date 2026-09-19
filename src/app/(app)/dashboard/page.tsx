@@ -71,23 +71,33 @@ export default async function DashboardPage() {
         <EmptyState title={t.dashboard.nothingToDo} />
       )}
 
-      {list.length > 0 && (
-        <ul className="flex flex-col gap-2.5">
-          {list.map((d) => (
-            <li key={d.id}>
-              <DoseCard t={t} dose={{ id: d.id, scheduled_at: d.scheduled_at, status: d.status, rx: d.prescriptions }} now={now.toISOString()} />
-            </li>
-          ))}
-        </ul>
-      )}
+      {(list.length > 0 || !noPrescriptions) && (
+        <div className="lg:max-w-doctor lg:w-full lg:grid lg:grid-cols-[3fr_2fr] lg:items-start lg:gap-7">
+          <div className="flex flex-col gap-2.5">
+            {list.length > 0 && (
+              <ul className="flex flex-col gap-2.5">
+                {list.map((d) => (
+                  <li key={d.id}>
+                    <DoseCard t={t} dose={{ id: d.id, scheduled_at: d.scheduled_at, status: d.status, rx: d.prescriptions }} now={now.toISOString()} />
+                  </li>
+                ))}
+              </ul>
+            )}
 
-      {allClear && (
-        <p className="text-center text-sm text-ink-muted">
-          ✓ {t.dashboard.allClearTitle} — <span dir="ltr">{list.length}</span> {t.dashboard.allClearBody}
-        </p>
-      )}
+            {allClear && (
+              <p className="text-center text-sm text-ink-muted">
+                ✓ {t.dashboard.allClearTitle} — <span dir="ltr">{list.length}</span> {t.dashboard.allClearBody}
+              </p>
+            )}
+          </div>
 
-      {!noPrescriptions && <CheckDoses t={t} />}
+          {!noPrescriptions && (
+            <div className="lg:sticky lg:top-4 lg:self-start">
+              <CheckDoses t={t} />
+            </div>
+          )}
+        </div>
+      )}
     </>
   )
 }

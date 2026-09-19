@@ -100,3 +100,60 @@ test('dashboard: one real Mark taken press survives a refresh (FE-3, FE-5)', asy
   for (const d of doses ?? []) await c.from('doses').update({ status: 'due', answered_at: null }).eq('id', d.id)
   await c.auth.signOut({ scope: 'local' })
 })
+
+/** D26: an extraction draft is accepted only by the patient, after correction; or discarded. */
+async function insertDraftAsA(generic: string) {
+  const c = sb()
+  await c.auth.signInWithPassword(A)
+  const me = (await c.auth.getUser()).data.user!.id
+  const { data, error } = await c.from('prescription_drafts').insert({
+    patient_id: me, source_image: null,
+    extracted: { drug_name_generic: generic, strength_value: 500, strength_unit: 'mg', dose_per_administration: 1, frequency_per_day: 3, duration_days: 7, dosing_pattern: 'daily', route: 'oral', source_facility: 'Dar Al Shifa Hospital', source_sector: 'private' },
+    confidence: { drug_name_generic: 0.94, strength_value: 0.81 },
+  }).select('id').single()
+  if (error) throw error
+  await c.auth.signOut({ scope: 'local' })
+  return data.id as string
+}
+
+test('drafts: the list shows the draft, accept with a correction inserts an `extracted` prescription and stamps the draft; discard deletes', async ({ page }) => {
+  const before = await countRxAsA()
+  const draftId = await insertDraftAsA('amoxicillin')
+  const discardId = await insertDraftAsA('ibuprofen')
+  await signIn(page)
+
+  await page.goto('/prescriptions?lang=en')
+  await expect(page.getByText(/Drafts awaiting your review/)).toBeVisible()
+  await page.getByRole('link', { name: /amoxicillin/i }).first().click()
+  await expect(page).toHaveURL(new RegExp(`/prescriptions/drafts/${draftId}`))
+  await expect(page.getByText(/confidence 94%/)).toBeVisible()
+  const strength = page.getByRole('spinbutton', { name: /^Strength/ }) // the label also carries the confidence hint
+  await expect(strength).toHaveValue('500')
+  await strength.fill('250') // the patient corrects the agent
+  await page.getByRole('button', { name: /Accept into my prescriptions/ }).click()
+  await page.waitForURL(/\/prescriptions$/, { timeout: 30_000 })
+  await expect(page.getByText(/amoxicillin/i).first()).toBeVisible()
+
+  const c = sb()
+  await c.auth.signInWithPassword(A)
+  const { data: rx } = await c.from('prescriptions').select('id, strength_value, source').eq('drug_name_generic', 'amoxicillin').eq('source', 'extracted')
+  const { data: d } = await c.from('prescription_drafts').select('accepted_at').eq('id', draftId).single()
+  console.log(`accepted → prescription source=${rx?.[0]?.source} strength=${rx?.[0]?.strength_value} (corrected from 500); draft accepted_at=${d?.accepted_at ? 'set' : 'NULL'}`)
+  expect(rx?.[0]?.source).toBe('extracted')
+  expect(Number(rx?.[0]?.strength_value)).toBe(250)
+  expect(d?.accepted_at).not.toBeNull()
+
+  // discard the second draft from its page
+  await page.goto(`/prescriptions/drafts/${discardId}`)
+  await page.getByRole('button', { name: /Discard draft/ }).click()
+  await page.waitForURL(/\/prescriptions$/, { timeout: 30_000 })
+  const { data: gone } = await c.from('prescription_drafts').select('id').eq('id', discardId)
+  console.log(`discarded → draft rows left with that id: ${gone?.length ?? 0}`)
+  expect(gone?.length ?? 0).toBe(0)
+
+  // clean up: the accepted prescription and the accepted draft
+  for (const r of rx ?? []) await c.from('prescriptions').delete().eq('id', r.id)
+  await c.from('prescription_drafts').delete().eq('id', draftId)
+  await c.auth.signOut({ scope: 'local' })
+  expect(await countRxAsA()).toBe(before)
+})

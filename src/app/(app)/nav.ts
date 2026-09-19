@@ -48,7 +48,7 @@ export function titleFor(t: Dictionary, path: string, fallbackName?: string): { 
       : undefined
     return { title: exact[path], backHref }
   }
-  if (path.startsWith('/prescriptions/')) return { title: t.nav.prescriptions, backHref: '/prescriptions' }
+  if (path.startsWith('/prescriptions/')) return { title: t.nav.prescriptions, backHref: '/prescriptions' } // detail and drafts/[id]
   if (path.startsWith('/doctor/patients/')) return { title: t.nav.patients, backHref: '/doctor' }
   return { title: fallbackName ?? t.brand }
 }

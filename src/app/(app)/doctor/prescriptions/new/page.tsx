@@ -24,13 +24,13 @@ export default async function NewDoctorPrescriptionPage({ searchParams }: { sear
   const patients = (links ?? []).map((l) => l.patient).filter((p): p is LinkedPatient => !!p)
 
   return (
-    <>
+    <div className="lg:mx-auto lg:w-full lg:max-w-form">
       <h1 className="sr-only">{t.newRx.title}</h1>
       {patients.length === 0 ? (
         <EmptyState title={t.newRx.noPatients} action={<ButtonLink href="/doctor/patients/add" className="w-full">{t.newRx.addPatientCta}</ButtonLink>} />
       ) : (
         <NewPrescriptionForm t={t} patients={patients} defaultPatientId={patient} />
       )}
-    </>
+    </div>
   )
 }
