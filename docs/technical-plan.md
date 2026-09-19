@@ -19,7 +19,7 @@ diagrams, and one script. There is no `package.json`, no `src/`, no `supabase/`.
 | Data | Supabase — Postgres, Auth, RLS |
 | Automation | n8n Cloud, four workflows |
 | Hosting | Vercel |
-| Runtime | Node 20, npm |
+| Runtime | Node 22, npm |
 
 `npm run build`, `npm run verify:rls`, `npm run verify:ui` are the three
 commands. The first two gate every commit and every merge.

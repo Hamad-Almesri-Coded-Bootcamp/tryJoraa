@@ -9,7 +9,7 @@ Before you paste it:
 
 1. **Accounts.** GitHub, Supabase, Vercel, n8n Cloud. In n8n: Settings → API →
    create an API key.
-2. **Tools.** Node 20, `gh auth login`, Claude Code installed.
+2. **Tools.** Node 22, `gh auth login`, Claude Code installed.
 3. **Plugin.**
    ```bash
    claude plugin marketplace add anthropics/claude-plugins-official

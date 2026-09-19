@@ -11,7 +11,7 @@ You will not type a git command this week after step 4.
 ## 1. Tools
 
 ```bash
-node -v      # need v20 or later — https://nodejs.org if not
+node -v      # need v22 or later — https://nodejs.org if not
 git --version
 gh --version # GitHub CLI — https://cli.github.com if not
 gh auth login

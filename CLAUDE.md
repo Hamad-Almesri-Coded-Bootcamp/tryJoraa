@@ -7,7 +7,7 @@ the floor, not the scope — we are building the whole app (`PRODUCT-DECISIONS.m
 
 ## Stack
 Next.js App Router + TypeScript + Tailwind, Supabase (Postgres / Auth / RLS),
-Vercel, n8n Cloud. npm, Node 20. Every screen works in Arabic (RTL) and English.
+Vercel, n8n Cloud. npm, Node 22 (supabase-js 2.109 needs a native WebSocket; Node 20 is deprecated by it). Every screen works in Arabic (RTL) and English.
 Web app first; a native app follows later and must not need a rewrite (D31).
 
 ## Commands
