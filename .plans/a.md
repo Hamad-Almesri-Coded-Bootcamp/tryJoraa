@@ -120,6 +120,85 @@ is ready.
 `runs` row plus every `audit_log` row carrying its `run_id` (D30). Blocked on C's
 workflow calling `/api/runs`.
 
+## A5 — SHOULD tier, back end + security
+
+Not tickable until all 28 MUSTs are green. Done now so they are not competing
+with the floor on Wednesday.
+
+### A5.1 — Correct column types · audit complete
+
+Read every column in `20260919120000_init.sql` against the rule: times are
+`timestamptz`, calendar days are `date`, quantities are `numeric`, statuses are
+enums, nothing important left as free text.
+
+**The schema passes.** Twelve enums, every timestamp `timestamptz`, every
+quantity `numeric`, `start_date`/`dispense_date` correctly `date` rather than
+`timestamptz` because a refill window is a calendar day and not an instant.
+
+Three notes, in order of how likely a judge is to press on them:
+
+| Column | Type | Verdict |
+|---|---|---|
+| `profiles.civil_id` | `text` | **Correct, and be ready to say why.** A civil ID is an identifier, not a number: it can carry a leading zero, and nobody does arithmetic on it. `numeric` would silently eat the zero. |
+| `alerts.guardrail` | `text` | Candidate enum — guardrails are a closed set `G1`–`G11` in `docs/agent-guardrails.md`. Left as text because C may still renumber them this week; an enum change mid-week costs a migration. Deliberate, not missed. |
+| `prescriptions.food_timing` | `text` | Free text, and rightly — it holds a bilingual instruction (`قبل الفطور بنصف ساعة · 30 min before breakfast`). Not a status, so not an enum. |
+
+### A5.2 — Full CRUD on one table from the front end · policies ready, needs B
+
+`prescriptions` is the table, restricted to rows the patient entered
+themselves. All four policies already exist in `init.sql`:
+
+| | Policy | Condition |
+|---|---|---|
+| C | `rx_insert_patient` | `patient_id = auth.uid() and source <> 'jurah_doctor'` |
+| R | `rx_select` | `patient_id = auth.uid() or is_linked_doctor(patient_id)` |
+| U | `rx_update_patient` | same as insert, on both `using` and `with check` |
+| D | `rx_delete_patient` | same, `using` |
+
+So a patient can create, read, edit and delete their **own** entered
+prescriptions, and can never touch one a doctor wrote. Calls for B, importing
+`src/lib/validation/prescriptions.ts` so the form and the database agree:
+
+```ts
+await supabase.from('prescriptions').insert(parsed.data).select('id').single()
+await supabase.from('prescriptions').select('*').order('created_at', { ascending: false })
+await supabase.from('prescriptions').update({ notes }).eq('id', id).select('id')
+await supabase.from('prescriptions').delete().eq('id', id).select('id')
+```
+
+Deleting cascades to that prescription's `doses` and leaves a `delete` row in
+`audit_log`. That is intended — say so if asked.
+
+### A5.3 — A second linked table on a real screen · already true
+
+`/dashboard` selects `doses` and joins `prescriptions` through
+`prescription_id` in one query
+(`dashboard/page.tsx:44`). When the judge asks you to point at the joining
+column, that is it.
+
+### A5.4 — Demo data looks real · reviewed, one gap
+
+`seed.sql` is strong: Kuwaiti names, real medicines with real brands
+(Euthyrox/levothyroxine, Ferro-Gradumet/ferrous sulfate), real facilities
+(Mubarak Al-Kabeer Hospital, Dar Al Shifa), bilingual food timing, public and
+private sectors, and dates computed relative to `today` so it never looks stale.
+
+**Gap: there are no dinars, because there is no money column anywhere in the
+schema.** The SHOULD names "Kuwaiti names, dinars, real dates". Adding a cost
+column is a product decision, not a lane decision — it needs a `D<n>` in
+`PRODUCT-DECISIONS.md` first. Raised, not actioned.
+
+### A5.5 — The security page · written
+
+`docs/security.md`: blast radius in one sentence, the three biggest threats each
+with the action already taken, the pages that work signed out and why each is
+safe, sign-out behaviour, and a 52-word privacy line.
+
+Finding while writing it: back-button-after-sign-out is safe **only because**
+Next sends `no-store` on dynamic routes by default — measured on the live URL,
+not assumed. Nobody chose it. If any authenticated page is ever made static or
+given a `revalidate`, that item breaks silently. Recorded in `security.md` §4.
+
 ## A4 — BE-1, BE-2, BE-4 · needs B's screens
 
 Data survives refresh and a private window; the app reads from the database; a
