@@ -6,7 +6,13 @@ import { createClient } from '@/lib/supabase/client'
 import { signUpSchema, firstIssue } from '@/lib/validation/auth'
 import type { Dictionary } from '@/i18n'
 
-type State = { kind: 'idle' } | { kind: 'loading' } | { kind: 'error'; message: string } | { kind: 'success' }
+type State =
+  | { kind: 'idle' }
+  | { kind: 'loading' }
+  | { kind: 'error'; message: string }
+  | { kind: 'success' }
+  /** Signed up, but the address is not confirmed yet, so there is no session. */
+  | { kind: 'checkEmail' }
 
 export function SignUpForm({ t }: { t: Dictionary }) {
   const router = useRouter()
@@ -31,18 +37,31 @@ export function SignUpForm({ t }: { t: Dictionary }) {
       password: parsed.data.password,
       options: { data: { full_name: parsed.data.full_name, civil_id: parsed.data.civil_id } },
     })
-    if (error) return setState({ kind: 'error', message: error.message })
-    if (!data.session) {
-      // email confirmation is on in the project: sign in explicitly
-      const { error: e2 } = await supabase.auth.signInWithPassword({ email: parsed.data.email, password: parsed.data.password })
-      if (e2) return setState({ kind: 'error', message: e2.message })
+    if (error) {
+      // Auth reports every failure of the handle_new_user trigger as the same
+      // opaque "Database error saving new user" — it names no field. The only
+      // way to hit it from this form is the UNIQUE on profiles.civil_id, so
+      // say that rather than showing the user a sentence about a database.
+      const opaque = /database error saving new user/i.test(error.message)
+      return setState({ kind: 'error', message: opaque ? t.auth.signUpFailed : error.message })
     }
+
+    if (!data.session) {
+      // Email confirmation is ON and stays on — it is a security control, not a
+      // setting to work around. Signing in here is what was wrong before: the
+      // address is not confirmed yet, so signInWithPassword always failed and
+      // the user saw an email error on a signup that had actually succeeded.
+      return setState({ kind: 'checkEmail' })
+    }
+
+    // Reached only if confirmation is ever turned off; then signUp returns a
+    // session and the old straight-to-dashboard path is still correct.
     setState({ kind: 'success' })
     router.replace('/dashboard')
     router.refresh()
   }
 
-  const busy = state.kind === 'loading' || state.kind === 'success'
+  const busy = state.kind === 'loading' || state.kind === 'success' || state.kind === 'checkEmail'
   const input = 'rounded-md border border-slate-300 px-3 py-3 text-base'
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
@@ -64,6 +83,7 @@ export function SignUpForm({ t }: { t: Dictionary }) {
       <p role="status" aria-live="polite" className={`min-h-6 text-sm ${state.kind === 'error' ? 'text-red-700' : 'text-emerald-800'}`}>
         {state.kind === 'error' && state.message}
         {state.kind === 'success' && t.auth.created}
+        {state.kind === 'checkEmail' && t.auth.checkEmail}
       </p>
     </form>
   )

@@ -25,6 +25,8 @@ export const en = {
     creating: 'Creating your account…',
     signedIn: 'Signed in. Taking you to your dashboard…',
     created: 'Account created. Taking you to your dashboard…',
+    checkEmail: 'Account created. Open the confirmation link we just emailed you, then sign in.',
+    signUpFailed: 'We could not create the account. This usually means that civil ID is already registered — try a different one.',
     noAccount: 'No account yet?',
     haveAccount: 'Already have an account?',
     doctorNote: 'Doctors are provisioned by the ministry sync and do not sign up here.',
