@@ -88,6 +88,16 @@ type Seed = { table: string; id: string }
 const TABLES: Array<{
   table: string
   optional?: boolean
+  /**
+   * If the insert is refused, fall back to A's most recent existing row instead
+   * of exiting. `runs` needs this: the cooldown trigger allows five inserts per
+   * patient per fifteen minutes, and `runs` has no delete policy (it is a log,
+   * by design — BE-5), so this script cannot clean up after itself. Without the
+   * fallback the sixth run of `npm run verify:rls` inside fifteen minutes dies
+   * on a hard exit and the merge gate goes red for a reason that looks like a
+   * broken database. Isolation is just as provable against an older row.
+   */
+  reusable?: boolean
   update: Record<string, unknown>
   row: (ctx: { userId: string; prescriptionId?: string }) => Record<string, unknown>
 }> = [
@@ -114,6 +124,7 @@ const TABLES: Array<{
   },
   {
     table: 'runs',
+    reusable: true,
     update: { status: 'failed' },
     row: ({ userId }) => ({ patient_id: userId, kind: 'check_doses' }),
   },
@@ -173,6 +184,15 @@ async function main() {
       if (t.optional) {
         console.log(`  note  ${t.table}: A cannot insert directly (${error?.message}). Only the agent writes it. Skipping.`)
         continue
+      }
+      if (t.reusable) {
+        const prior = await a.sb.from(t.table).select('id').eq('patient_id', a.userId)
+          .order('started_at', { ascending: false }).limit(1).maybeSingle()
+        if (prior.data?.id) {
+          console.log(`  note  ${t.table}: insert refused (${error?.message}) — reusing A's most recent row.`)
+          seeds.push({ table: t.table, id: prior.data.id })
+          continue
+        }
       }
       console.error(`\n  Could not seed ${t.table}: ${error?.message}\n`)
       process.exit(1)
@@ -296,7 +316,15 @@ async function main() {
   console.log('\n  Probe 8 · SE-5 · oversized input is refused by the database')
   const a4 = await signIn(A)
   const long = 'x'.repeat(5000)
-  const refused = (r: { error: unknown }) => !!r.error
+
+  /**
+   * A refusal only counts if the DATABASE refused it. `!!error` would let a
+   * dropped connection or an expired token report PASS, which is the one way a
+   * security probe can lie. 23514 = check_violation, 23505 = unique_violation,
+   * 22001 = string too long.
+   */
+  const CONSTRAINT = new Set(['23514', '23505', '22001'])
+  const refused = (r: { error: { code?: string } | null }) => CONSTRAINT.has(r.error?.code ?? '')
 
   const rxNotes = await a4.sb.from('prescriptions').update({ notes: long }).eq('id', prescriptionId!).select('id')
   record(refused(rxNotes), '5,000-character notes is refused', rxNotes.error ? '' : 'rx_notes_len IS MISSING — 20260919235500_input_limits.sql NOT APPLIED')
@@ -317,11 +345,29 @@ async function main() {
   record(refused(pName), '5,000-character full_name is refused', pName.error ? '' : 'profiles_full_name_len IS MISSING')
   const pCivil = await a4.sb.from('profiles').update({ civil_id: 'not-twelve-digits' }).eq('id', a4.userId).select('id')
   record(refused(pCivil), 'a civil_id that is not 12 digits is refused', pCivil.error ? '' : 'profiles_civil_id_format IS MISSING')
+  // `authenticated` really does hold `grant update (full_name, civil_id) on
+  // profiles`, so if the constraints are absent those two writes LAND. Checking
+  // and walking away would leave A with a 5,000-character name and a malformed
+  // civil ID — and 20260919235500_input_limits.sql could then never be applied,
+  // because validating `profiles_civil_id_format` against that row fails. The
+  // gate would have poisoned the fix for its own failure. Restore, always.
   const after = await a4.sb.from('profiles').select('full_name, civil_id').eq('id', a4.userId).single()
-  record(
-    before.data?.full_name === after.data?.full_name && before.data?.civil_id === after.data?.civil_id,
-    'A\'s profile is unchanged after the refused writes'
-  )
+  const intact =
+    before.data?.full_name === after.data?.full_name &&
+    before.data?.civil_id === after.data?.civil_id
+
+  if (!intact && before.data) {
+    const restore = await a4.sb
+      .from('profiles')
+      .update({ full_name: before.data.full_name, civil_id: before.data.civil_id })
+      .eq('id', a4.userId)
+      .select('id')
+    record(false, 'A\'s profile was MODIFIED by the refused writes', restore.error
+      ? `restore FAILED: ${restore.error.message} — fix A's profile by hand before applying input_limits`
+      : 'restored to its previous values')
+  } else {
+    record(true, 'A\'s profile is unchanged after the refused writes')
+  }
 
   // The mirror of all of the above: ordinary values still go in. A gate that
   // refuses everything is not a gate, it is an outage.

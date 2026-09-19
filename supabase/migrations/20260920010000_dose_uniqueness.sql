@@ -41,6 +41,24 @@
 -- This deletes only exact (prescription_id, scheduled_at) duplicates. On a
 -- clean database it deletes nothing.
 
+-- Say how many BEFORE removing them. This is an unbounded DELETE against live
+-- clinical rows, it cannot be undone, and each delete fires audit_row() — so
+-- the audit trail will record a system-actor removal of doses. On a clean
+-- database the number is 0 and nothing happens. If it is not 0, stop and read
+-- it before letting the rest of the file run.
+do $$
+declare v_dupes int;
+begin
+  select count(*) into v_dupes
+  from (
+    select prescription_id, scheduled_at
+    from doses
+    group by prescription_id, scheduled_at
+    having count(*) > 1
+  ) g;
+  raise notice 'dose_uniqueness: % duplicated slot(s) found; extra rows will be removed', v_dupes;
+end $$;
+
 with ranked as (
   select
     id,
@@ -55,6 +73,9 @@ using ranked r
 where d.id = r.id and r.rn > 1;
 
 -- ------------------------------------------------------ 2. the constraint ---
+-- `add constraint` has no IF NOT EXISTS, so drop first: this file stays
+-- re-runnable, which matters because the dedupe above is idempotent too.
+alter table doses drop constraint if exists doses_one_slot_per_prescription;
 alter table doses
   add constraint doses_one_slot_per_prescription unique (prescription_id, scheduled_at);
 

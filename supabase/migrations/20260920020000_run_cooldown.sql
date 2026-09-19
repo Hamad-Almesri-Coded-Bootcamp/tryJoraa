@@ -32,8 +32,26 @@
 -- insert, and a future workflow that creates runs on a schedule should not be
 -- throttled by a per-patient interactive limit.
 
+-- SECURITY INVOKER, and that is load-bearing. An earlier draft of this file
+-- used SECURITY DEFINER and was wrong twice over.
+--
+-- First, init.sql line 4 and technical-plan §3.5 say the schema has exactly
+-- three definer functions — audit_row, audit_reference_row, handle_new_user —
+-- and that the reviewer flags any fourth. This would have been the fourth.
+--
+-- Second, and worse, it built a cross-account oracle on top of the thing the
+-- eight probes exist to disprove. A BEFORE ROW trigger fires before the RLS
+-- WITH CHECK is evaluated, so account B could insert with
+-- `patient_id = <A's id>` and read A's agent activity off the *shape of the
+-- error*: a generic RLS violation means A has fewer than five recent runs, the
+-- sentence below means A has five or more.
+--
+-- As INVOKER the count runs under the caller's own RLS. `run_select` is
+-- `patient_id = (select auth.uid())`, so B counting A's runs sees zero, falls
+-- through, and is then refused by the WITH CHECK with the same generic message
+-- either way. No oracle, and no privilege this function did not need.
 create or replace function enforce_run_cooldown() returns trigger
-language plpgsql security definer set search_path = public
+language plpgsql security invoker set search_path = public
 as $$
 declare
   v_window   constant interval := interval '15 minutes';
@@ -43,7 +61,13 @@ declare
   v_wait_min int;
 begin
   -- The agent is not a person pressing a button.
-  if coalesce(auth.role(), '') = 'service_role' then
+  --
+  -- `current_user`, not `auth.role()`. auth.role() is deprecated and is absent
+  -- from some projects — and if it does not resolve, this trigger raises 42883
+  -- on EVERY insert into runs, which takes AU-1, AU-2, AU-6 and BE-5 down
+  -- together. current_user is the role PostgREST connected as, cannot throw,
+  -- and is exactly the distinction being drawn here.
+  if current_user = 'service_role' then
     return new;
   end if;
 

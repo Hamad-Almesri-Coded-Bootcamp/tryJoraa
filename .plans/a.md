@@ -1,5 +1,20 @@
 # Lane A — data & security
 
+## Dependencies — files and decisions outside this lane
+
+Raised here rather than touched, per `CLAUDE.md` → Lanes.
+
+| # | What | Owner | Why |
+|---|---|---|---|
+| D-1 | `docs/security.md`, `docs/cleaning-log.md`, `docs/break-room.md` were written by Lane A, but `docs/**` belongs to Lane C | **boss / C** | Rule breach, content is sound. Re-home them or reassign the paths. `security.md` also states verified claims about B's `(app)` route guards — B should confirm the wording. |
+| D-2 | `doses_one_slot_per_prescription` makes a dose move onto an occupied slot raise `23505` | **C** | Moving a dose in time is the decision agent's *only* permitted action, and on a 6/day course the slots are three hours apart, so a catch-up collision is normal, not an edge case. The rescheduler must pick the next free slot or surface the clash. The constraint stays — it is what stops `generate_doses` being replayed into 13,140 rows. |
+| D-3 | `POST /api/runs` returns the cooldown refusal as **HTTP 500** (`route.ts:34`) | **C** | A rate-limit refusal is not a server fault. It should be **429** with the message in the body, or B cannot tell "wait two minutes" from "the backend is broken". |
+| D-4 | The cooldown message needs rendering | **B** | `/api/runs` forwards `error.message`; the COULD item is "stops you **and says so**". |
+| D-5 | `SignUpForm.tsx` calls `signInWithPassword()` immediately after `signUp()` | **B** | Email confirmation stays ON — that is a security control and the team has decided it is not moving. So the form is what is wrong: it should show "check your email to confirm your account" as its success state, not try to sign in before the address is confirmed. |
+| D-6 | Reliable confirmation email delivery | **lead** | Supabase's built-in sender is rate-limited and does not deliver dependably to arbitrary addresses. BE-4 is "works on the first try in front of the judge", so it needs real SMTP (Resend/SendGrid) configured on the project. |
+| D-7 | `20260919235500_input_limits.sql` is **not** re-runnable | **note** | `add constraint` has no `IF NOT EXISTS` and there are ~20 of them. Fine under `db push`, which applies a migration once. Drop the named constraints first if re-applying by hand. |
+
+
 Owner A. Branch `a/data`. One task at a time, each with the command or screen
 that proves it. `CLAUDE.md` → Plan → build → prove.
 
