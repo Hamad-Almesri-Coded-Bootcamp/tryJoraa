@@ -184,9 +184,20 @@ column, that is it.
 private sectors, and dates computed relative to `today` so it never looks stale.
 
 **Gap: there are no dinars, because there is no money column anywhere in the
-schema.** The SHOULD names "Kuwaiti names, dinars, real dates". Adding a cost
-column is a product decision, not a lane decision — it needs a `D<n>` in
+schema.** Checked against the authoritative checklist page, not our summary of
+it — the item reads *"Your demo data looks real. Kuwaiti names, real looking
+dates, **amounts in dinars**. No rows saying test test test."* and the test is
+*"scroll the list on the demo screen"*. So an amount has to be visible on a
+demo screen, not merely stored.
+
+This is the one back-end SHOULD that cannot pass as the schema stands. Adding a
+cost column is a product decision, not a lane decision — it needs a `D<n>` in
 `PRODUCT-DECISIONS.md` first. Raised, not actioned.
+
+Smallest change that would satisfy it: a `cost_kwd numeric(7,3)` on
+`prescriptions` (three decimals — the dinar has 1000 fils), seeded with
+plausible pharmacy prices and rendered on the prescriptions list. One migration,
+one seed edit, one line in B's list item.
 
 ### A5.5 — The security page · written
 
