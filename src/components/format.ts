@@ -50,3 +50,9 @@ export function maskCivilId(id: string | null | undefined) {
   if (!id) return ''
   return '•'.repeat(Math.max(0, id.length - 3)) + id.slice(-3)
 }
+
+/** Headings show a stored name, not a dump: longer than this is cut with an ellipsis (presentation only). */
+export function clipText(s: string | null | undefined, max = 120): string {
+  if (!s) return ''
+  return s.length > max ? s.slice(0, max) + '…' : s
+}

@@ -7,7 +7,7 @@ export function AuditRow({ t, row, names }: { t: Dictionary; row: AuditRowData; 
   const s = auditSentence(t, row, names)
   return (
     <Card variant="read" className="flex flex-col gap-1">
-      <p className="text-sm text-navy">
+      <p className="text-sm text-navy [overflow-wrap:anywhere]">
         <span className="font-semibold">{s.who}</span> {s.what}
         {s.detail && <span className="text-ink-muted"> — {s.detail}</span>}
       </p>

@@ -60,7 +60,7 @@ export function DoseCard({ t, dose, now, readOnly }: { t: Dictionary; dose: Dose
     <Card variant={missed ? 'refusal' : 'default'} data-state={dose.status} className="flex flex-col gap-2">
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col gap-0.5">
-          <p className="text-base font-bold text-navy">
+          <p className="text-base font-bold text-navy [overflow-wrap:anywhere]">
             <span dir="ltr">{fmtTime(dose.scheduled_at, t.locale)}</span>
             <span aria-hidden> · </span>
             <span className="capitalize">{name}</span>

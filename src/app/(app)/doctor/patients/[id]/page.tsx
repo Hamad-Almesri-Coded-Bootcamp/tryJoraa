@@ -9,7 +9,7 @@ import type { AuditRowData } from '@/components/audit'
 import { Card } from '@/components/ui/Card'
 import { SectionLabel } from '@/components/ui/bits'
 import { ButtonLink } from '@/components/ui/Button'
-import { maskCivilId } from '@/components/format'
+import { maskCivilId, clipText } from '@/components/format'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -85,7 +85,7 @@ export default async function DoctorPatientPage({ params }: { params: Promise<{ 
     <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[1.4fr_1fr] lg:gap-6 lg:items-start">
       <div className="flex flex-col gap-3 lg:col-start-1">
         <div className="flex flex-col gap-0.5">
-          <h1 className="text-xl font-bold text-navy">{patient.full_name}</h1>
+          <h1 className="text-xl font-bold text-navy [overflow-wrap:anywhere]">{clipText(patient.full_name)}</h1>
           <p className="text-xs text-ink-muted">
             {t.doctor.civilId} <span dir="ltr">{maskCivilId(patient.civil_id)}</span> · {t.doctor.linkedTo} {doctorName}
           </p>
@@ -123,7 +123,7 @@ export default async function DoctorPatientPage({ params }: { params: Promise<{ 
         <WeekDots t={t} doses={doses ?? []} now={new Date()} />
 
         <SectionLabel>{t.doctor.trail}</SectionLabel>
-        <AuditList t={t} rows={audit ?? []} names={{ patient: patient.full_name, doctor: doctorName }} empty={t.doctor.trailEmpty} />
+        <AuditList t={t} rows={audit ?? []} names={{ patient: clipText(patient.full_name), doctor: doctorName }} empty={t.doctor.trailEmpty} />
       </div>
     </div>
   )

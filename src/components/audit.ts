@@ -25,14 +25,14 @@ const IGNORED = new Set(['id', 'created_at', 'updated_at', 'patient_id', 'doctor
  */
 export function auditSentence(t: Dictionary, row: AuditRowData, names?: { patient?: string; doctor?: string }): { who: string; what: string; detail: string; when: string } {
   const who =
-    row.actor_role === 'patient' ? (names?.patient ?? t.history.byPatient)
-    : row.actor_role === 'doctor' ? (names?.doctor ?? t.history.byDoctor)
+    row.actor_role === 'patient' ? clip(names?.patient ?? t.history.byPatient)
+    : row.actor_role === 'doctor' ? clip(names?.doctor ?? t.history.byDoctor)
     : row.actor_role === 'agent' ? t.history.byAgent
     : t.history.bySystem
   const verb = row.action === 'insert' ? t.history.inserted : row.action === 'update' ? t.history.updated : t.history.deleted
   const objectLabel = (t.history as Record<string, string>)[row.table_name] ?? row.table_name
   const rec = row.after ?? row.before ?? {}
-  const medicine = typeof rec.drug_name_generic === 'string' ? rec.drug_name_generic : typeof rec.ingredient === 'string' ? rec.ingredient : null
+  const medicine = typeof rec.drug_name_generic === 'string' ? clip(rec.drug_name_generic) : typeof rec.ingredient === 'string' ? clip(rec.ingredient) : null
   const what = `${verb} ${objectLabel}${medicine ? ` (${medicine})` : ''}`
 
   const changes: string[] = []
@@ -47,6 +47,11 @@ export function auditSentence(t: Dictionary, row: AuditRowData, names?: { patien
   }
   const detail = changes.join(' · ')
   return { who, what, detail, when: fmtDateTime(row.at, t.locale) }
+}
+
+/** A sentence, not a dump: a stored value longer than this is shown cut, with an ellipsis (presentation only). */
+function clip(v: string, max = 80): string {
+  return v.length > max ? v.slice(0, max) + '…' : v
 }
 
 function fieldLabel(t: Dictionary, k: string): string {
@@ -67,5 +72,5 @@ function fmtValue(t: Dictionary, k: string, v: unknown): string {
   if (typeof v === 'boolean') return v ? t.meds.yes : t.meds.no
   if (typeof v === 'number') return fmtNumber(v, t.locale)
   if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(v)) return fmtDateTime(v, t.locale)
-  return String(v)
+  return clip(String(v))
 }

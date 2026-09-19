@@ -27,7 +27,7 @@ export function PrescriptionCard({ t, rx, href, trailing }: { t: Dictionary; rx:
   const body = (
     <>
       <div className="flex items-start justify-between gap-2">
-        <p className="min-w-0 text-base font-bold capitalize text-navy">
+        <p className="min-w-0 text-base font-bold capitalize text-navy [overflow-wrap:anywhere]">
           {rx.drug_name_generic}
           {rx.drug_name_brand && <span className="font-normal text-ink-muted"> ({rx.drug_name_brand})</span>}
         </p>

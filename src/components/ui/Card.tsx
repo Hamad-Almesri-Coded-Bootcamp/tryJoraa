@@ -12,7 +12,7 @@ export type CardVariant = 'default' | 'refusal' | 'flag' | 'muted' | 'read'
 
 export function cardClass(variant: CardVariant = 'default', extra?: string) {
   return cx(
-    'bg-white',
+    'bg-white min-w-0 [overflow-wrap:anywhere]',
     variant === 'default' && 'rounded-md border border-line px-3 py-2.5',
     variant === 'read' && 'rounded-md border border-line px-3 py-3',
     variant === 'refusal' && 'rounded-md border border-red-line border-s-4 border-s-red px-3 py-2.5',

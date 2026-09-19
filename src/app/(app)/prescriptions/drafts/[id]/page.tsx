@@ -52,7 +52,7 @@ export default async function DraftPage({ params }: { params: Promise<{ id: stri
 
   return (
     <>
-      <h1 className="text-xl font-bold text-navy">{t.drafts.title}</h1>
+      <h1 className="text-xl font-bold text-navy [overflow-wrap:anywhere]">{t.drafts.title}</h1>
       <p className="text-sm text-ink-muted">{t.drafts.intro}</p>
       <p className="text-xs text-ink-muted">
         <Tag tone="muted">{t.source.extracted}</Tag>{' '}

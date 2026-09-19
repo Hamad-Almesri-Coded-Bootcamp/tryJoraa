@@ -78,7 +78,7 @@ export default async function PrescriptionPage({ params }: { params: Promise<{ i
 
   return (
     <>
-      <h1 className="text-xl font-bold capitalize text-navy">
+      <h1 className="text-xl font-bold capitalize text-navy [overflow-wrap:anywhere]">
         {rx.drug_name_generic}
         {rx.drug_name_brand && <span className="font-normal text-ink-muted"> ({rx.drug_name_brand})</span>}
       </h1>
