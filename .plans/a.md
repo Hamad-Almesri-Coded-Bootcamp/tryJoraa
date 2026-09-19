@@ -82,12 +82,38 @@ to the real project — that is a handoff, not a tick.
 
 ## A2 — SE-6: AI security audit + two live fixes · Mon 21 Sep
 
-Boss runs the `/cso` skill on `main` Monday evening. A writes up
-`docs/security-audit.md` and ships two fixes. The checklist's two blanks get
-filled with the commit for each.
+Boss runs the `/cso` skill on `main` Monday evening and owns
+`docs/security-audit.md`. Findings land here as lane tasks. A pre-pass over the
+data layer produced three, two of them fixed and waiting on a merge:
 
-Candidate already in hand: the `handle_new_user` metadata hole above, if A1.3
-has not already closed it by then.
+| # | Finding | Severity | State |
+|---|---|---|---|
+| A2.1 | Unbounded text + unvalidated signup metadata — 5,000 chars reach `profiles` with the anon key, no form involved | High | Fixed, `20260919235500_input_limits.sql` |
+| A2.2 | `generate_doses()` is re-runnable from `/rest/v1/rpc` — no uniqueness on `(prescription_id, scheduled_at)` | High | Fixed, `20260920010000_dose_uniqueness.sql` |
+| A2.3 | `POST /api/runs` has no rate limit — a signed-in user can queue unlimited agent runs, each one a model call | Medium | Open, shared with C |
+
+**A2.2 in detail.** `generate_doses` is SECURITY INVOKER and must stay
+executable by `authenticated` — the insert trigger calls it in the user's own
+session, so `20260919121000_revoke_function_execute.sql` is right to leave it
+alone. But PostgREST publishes it, `doses` had no uniqueness, and the function
+had no already-generated check. RLS never objects because the rows belong to
+the caller.
+
+Measured on a scratch project with a 365-day, 6-a-day prescription:
+
+| | dose rows | duplicated slots |
+|---|---|---|
+| after the insert trigger | 2,190 | 0 |
+| after five `rpc/generate_doses` calls | **13,140** | 2,190 |
+| after the fix | 2,190 | 0 |
+
+Re-running now returns 0. The dedupe keeps the row the patient actually
+answered, not merely the oldest — verified: the contested slot's survivor was
+the `taken` row.
+
+**A2.3 is not mine alone.** The cooldown belongs next to whatever calls the
+model. The database half — counting recent `runs` per patient — is here when C
+is ready.
 
 ## A3 — BE-5: every run leaves a row · with C
 
