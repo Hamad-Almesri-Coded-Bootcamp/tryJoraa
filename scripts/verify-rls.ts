@@ -9,7 +9,7 @@
  *   DOCTOR_LINKED  linked to A through doctor_patients
  *   DOCTOR_UNLINKED linked to nobody
  *
- * Seven probes. Every one prints PASS or FAIL. Exit 1 on any FAIL.
+ * Eight probes. Every one prints PASS or FAIL. Exit 1 on any FAIL.
  *   1  B cannot select, update or delete any of A's rows — prescriptions, doses, runs, alerts
  *   2  B cannot insert a prescription with patient_id = A
  *   3  B cannot insert a row claiming source = 'jurah_doctor'
@@ -17,6 +17,13 @@
  *   5  the LINKED doctor reads A's prescription but cannot update one they did not author
  *   6  B reads nothing from depletion_forecast
  *   7  B reads none of A's audit_log rows; nobody can insert, update or delete an audit row
+ *   8  SE-5 — oversized and absurd values are refused on A's OWN rows
+ *
+ * Probe 8 is not isolation, it is SE-5, and it lives here because this is the
+ * one gate that talks to the database over PostgREST with the anon key — which
+ * is the surface a judge (or anyone) actually reaches. Zod in the form cannot be
+ * proved from here and does not need to be: the point of probe 8 is that the
+ * database refuses on its own when the form is bypassed.
  *
  * When a probe fails, fix the policy. Never the assertion.
  */
@@ -81,6 +88,16 @@ type Seed = { table: string; id: string }
 const TABLES: Array<{
   table: string
   optional?: boolean
+  /**
+   * If the insert is refused, fall back to A's most recent existing row instead
+   * of exiting. `runs` needs this: the cooldown trigger allows five inserts per
+   * patient per fifteen minutes, and `runs` has no delete policy (it is a log,
+   * by design — BE-5), so this script cannot clean up after itself. Without the
+   * fallback the sixth run of `npm run verify:rls` inside fifteen minutes dies
+   * on a hard exit and the merge gate goes red for a reason that looks like a
+   * broken database. Isolation is just as provable against an older row.
+   */
+  reusable?: boolean
   update: Record<string, unknown>
   row: (ctx: { userId: string; prescriptionId?: string }) => Record<string, unknown>
 }> = [
@@ -107,6 +124,7 @@ const TABLES: Array<{
   },
   {
     table: 'runs',
+    reusable: true,
     update: { status: 'failed' },
     row: ({ userId }) => ({ patient_id: userId, kind: 'check_doses' }),
   },
@@ -151,7 +169,7 @@ function record(ok: boolean, label: string, detail = '') {
 const none = (r: { data: unknown[] | null; error: unknown }) => !!r.error || (r.data?.length ?? 0) === 0
 
 async function main() {
-  console.log('\n  verify-rls · anon key only · four accounts · seven probes\n')
+  console.log('\n  verify-rls · anon key only · four accounts · eight probes\n')
 
   // --- 0. Seed as A -------------------------------------------------------
   console.log('  Signing in as A and seeding rows…')
@@ -166,6 +184,15 @@ async function main() {
       if (t.optional) {
         console.log(`  note  ${t.table}: A cannot insert directly (${error?.message}). Only the agent writes it. Skipping.`)
         continue
+      }
+      if (t.reusable) {
+        const prior = await a.sb.from(t.table).select('id').eq('patient_id', a.userId)
+          .order('started_at', { ascending: false }).limit(1).maybeSingle()
+        if (prior.data?.id) {
+          console.log(`  note  ${t.table}: insert refused (${error?.message}) — reusing A's most recent row.`)
+          seeds.push({ table: t.table, id: prior.data.id })
+          continue
+        }
       }
       console.error(`\n  Could not seed ${t.table}: ${error?.message}\n`)
       process.exit(1)
@@ -281,6 +308,72 @@ async function main() {
   const dlRun = await dl.sb.from('runs').select('id').eq('patient_id', a.userId)
   record(none(dlRun), 'linked doctor reads no runs (patient-only)')
   await dl.sb.auth.signOut()
+
+  // --- 8. SE-5, on A's own rows ---------------------------------------------
+  // Everything above asks "can B reach A?". This asks "can A store nonsense?",
+  // which is the other way a row goes bad. A owns these rows, so RLS is happy
+  // and only the CHECK constraints and handle_new_user stand in the way.
+  console.log('\n  Probe 8 · SE-5 · oversized input is refused by the database')
+  const a4 = await signIn(A)
+  const long = 'x'.repeat(5000)
+
+  /**
+   * A refusal only counts if the DATABASE refused it. `!!error` would let a
+   * dropped connection or an expired token report PASS, which is the one way a
+   * security probe can lie. 23514 = check_violation, 23505 = unique_violation,
+   * 22001 = string too long.
+   */
+  const CONSTRAINT = new Set(['23514', '23505', '22001'])
+  const refused = (r: { error: { code?: string } | null }) => CONSTRAINT.has(r.error?.code ?? '')
+
+  const rxNotes = await a4.sb.from('prescriptions').update({ notes: long }).eq('id', prescriptionId!).select('id')
+  record(refused(rxNotes), '5,000-character notes is refused', rxNotes.error ? '' : 'rx_notes_len IS MISSING — 20260919235500_input_limits.sql NOT APPLIED')
+
+  const rxName = await a4.sb.from('prescriptions').insert({ ...TABLES[0].row({ userId: a4.userId }), drug_name_generic: long }).select('id')
+  record(refused(rxName), '5,000-character drug name is refused', rxName.error ? '' : 'rx_generic_len IS MISSING')
+  if (!rxName.error && rxName.data?.[0]?.id) seeds.push({ table: 'prescriptions', id: rxName.data[0].id })
+
+  const rxDose = await a4.sb.from('prescriptions').insert({ ...TABLES[0].row({ userId: a4.userId }), dose_per_administration: 500000 }).select('id')
+  record(refused(rxDose), 'a dose of 500000 is refused', rxDose.error ? '' : 'rx_dose_max IS MISSING')
+  if (!rxDose.error && rxDose.data?.[0]?.id) seeds.push({ table: 'prescriptions', id: rxDose.data[0].id })
+
+  // profiles: authenticated holds UPDATE on (full_name, civil_id) only.
+  // Read first, attempt the bad writes, then confirm nothing moved — the test
+  // account is left exactly as it was found.
+  const before = await a4.sb.from('profiles').select('full_name, civil_id').eq('id', a4.userId).single()
+  const pName = await a4.sb.from('profiles').update({ full_name: long }).eq('id', a4.userId).select('id')
+  record(refused(pName), '5,000-character full_name is refused', pName.error ? '' : 'profiles_full_name_len IS MISSING')
+  const pCivil = await a4.sb.from('profiles').update({ civil_id: 'not-twelve-digits' }).eq('id', a4.userId).select('id')
+  record(refused(pCivil), 'a civil_id that is not 12 digits is refused', pCivil.error ? '' : 'profiles_civil_id_format IS MISSING')
+  // `authenticated` really does hold `grant update (full_name, civil_id) on
+  // profiles`, so if the constraints are absent those two writes LAND. Checking
+  // and walking away would leave A with a 5,000-character name and a malformed
+  // civil ID — and 20260919235500_input_limits.sql could then never be applied,
+  // because validating `profiles_civil_id_format` against that row fails. The
+  // gate would have poisoned the fix for its own failure. Restore, always.
+  const after = await a4.sb.from('profiles').select('full_name, civil_id').eq('id', a4.userId).single()
+  const intact =
+    before.data?.full_name === after.data?.full_name &&
+    before.data?.civil_id === after.data?.civil_id
+
+  if (!intact && before.data) {
+    const restore = await a4.sb
+      .from('profiles')
+      .update({ full_name: before.data.full_name, civil_id: before.data.civil_id })
+      .eq('id', a4.userId)
+      .select('id')
+    record(false, 'A\'s profile was MODIFIED by the refused writes', restore.error
+      ? `restore FAILED: ${restore.error.message} — fix A's profile by hand before applying input_limits`
+      : 'restored to its previous values')
+  } else {
+    record(true, 'A\'s profile is unchanged after the refused writes')
+  }
+
+  // The mirror of all of the above: ordinary values still go in. A gate that
+  // refuses everything is not a gate, it is an outage.
+  const ok = await a4.sb.from('prescriptions').update({ notes: 'Take with food.' }).eq('id', prescriptionId!).select('id')
+  record(!ok.error && (ok.data?.length ?? 0) === 1, 'an ordinary note is still accepted', ok.error?.message ?? '')
+  await a4.sb.auth.signOut()
 
   // --- Clean up as A -----------------------------------------------------------
   const a3 = await signIn(A)

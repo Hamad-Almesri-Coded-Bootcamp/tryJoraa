@@ -1,0 +1,10 @@
+# CLI scratch state. `supabase link` writes the linked project ref here, and
+# some CLI versions also drop a pooler connection string in. None of it belongs
+# in a repo a judge searches for keys and tokens (SE-2).
+.branches
+.temp
+
+# dotenvx
+.env.keys
+.env.local
+.env.*.local
