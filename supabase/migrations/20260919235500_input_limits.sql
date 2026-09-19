@@ -95,8 +95,29 @@ begin
       using errcode = 'check_violation';
   end if;
 
-  insert into profiles (id, role, full_name, civil_id)
-  values (new.id, 'patient', v_name, v_civil);
+  -- `profiles.civil_id` is UNIQUE. A second signup reusing a civil ID raises
+  -- 23505 out of this trigger, and Supabase Auth reports every trigger failure
+  -- to the browser as the same opaque "Database error saving new user" — which
+  -- says nothing about which field is wrong and sends people hunting through
+  -- the email settings.
+  --
+  -- We cannot hand the browser a better sentence from in here; Auth swallows
+  -- it. What we CAN do is stop guessing when it happens: this message lands in
+  -- the Postgres logs naming the field, so the next person reads one log line
+  -- instead of bisecting a signup form.
+  --
+  -- Deliberately NOT solved with a "is this civil ID free?" RPC. That endpoint
+  -- would answer for anyone holding the anon key, which is an enumeration
+  -- oracle over who is registered — exactly what technical-plan §9 forbids for
+  -- the doctor's patient lookup, for the same reason.
+  begin
+    insert into profiles (id, role, full_name, civil_id)
+    values (new.id, 'patient', v_name, v_civil);
+  exception when unique_violation then
+    raise exception
+      'civil_id % is already registered to another account', v_civil
+      using errcode = 'unique_violation';
+  end;
 
   return new;
 end $$;
