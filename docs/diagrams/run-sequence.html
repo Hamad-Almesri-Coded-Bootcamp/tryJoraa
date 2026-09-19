@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One press of Check my doses</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper: #f5f5f5; --color-ink: #2d3142; --color-muted: #4f5d75; --color-accent: #eb6c36;
+      --font-sans: 'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif', serif;
+      --font-mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem;
+    }
+    .frame { max-width: 1240px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 940px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Sequence · Jur'ah</p>
+    <h1>One press of “Check my doses”</h1>
+
+    <svg viewBox="0 0 1060 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="run-sequence-title run-sequence-desc">
+      <title id="run-sequence-title">One press of Check my doses</title>
+      <desc id="run-sequence-desc">A patient presses Check in the Jur'ah app; the app verifies the session, records the run, and calls the n8n workflow with a server-held secret; n8n reads the medicine profile from the database, asks the decision agent for a verdict, writes the result and any alert back, and the patient sees the outcome in the app.</desc>
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+        <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="arrow-l" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto-start-reverse"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+        <marker id="arrow-l-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto-start-reverse"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+      <!-- ============ LIFELINES ============ -->
+      <line x1="100" y1="84" x2="100" y2="600" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="300" y1="84" x2="300" y2="600" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="520" y1="84" x2="520" y2="600" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="740" y1="84" x2="740" y2="600" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="955" y1="84" x2="955" y2="600" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+
+      <!-- ============ MESSAGES ============ -->
+
+      <!-- 1. Patient -> App -->
+      <line x1="100" y1="130" x2="294" y2="130" stroke="#4f5d75" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <rect x="153" y="110" width="88" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="197" y="119" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">PRESSES CHECK</text>
+
+      <!-- 2. App -> Supabase -->
+      <line x1="304" y1="170" x2="516" y2="170" stroke="#4f5d75" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <rect x="366" y="150" width="88" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="410" y="159" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">WRITE RUN ROW</text>
+
+      <!-- 3. App -> n8n (link blue, server secret) -->
+      <line x1="304" y1="214" x2="732" y2="214" stroke="#2e5aa8" stroke-width="1.5" marker-end="url(#arrow-link)"/>
+      <rect x="370" y="194" width="100" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="420" y="203" fill="#2e5aa8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">POST + SECRET</text>
+
+      <!-- 4. n8n --> App (return) -->
+      <line x1="732" y1="254" x2="308" y2="254" stroke="#4f5d75" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+      <rect x="578" y="234" width="84" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="620" y="243" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">202 QUEUED</text>
+
+      <!-- 5. App --> Patient (return) -->
+      <line x1="296" y1="294" x2="104" y2="294" stroke="#4f5d75" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+      <rect x="152" y="274" width="96" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="200" y="283" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">SHOWS RUNNING</text>
+
+      <!-- 6. n8n -> Supabase -->
+      <line x1="732" y1="338" x2="524" y2="338" stroke="#4f5d75" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <rect x="592" y="318" width="88" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="636" y="327" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">READ PROFILE</text>
+
+      <!-- 7. Supabase --> n8n (return) -->
+      <line x1="524" y1="378" x2="732" y2="378" stroke="#4f5d75" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+      <rect x="592" y="358" width="88" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="636" y="367" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">PARAMETERS</text>
+
+      <!-- 8. n8n -> Agent -->
+      <line x1="748" y1="418" x2="947" y2="418" stroke="#4f5d75" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <rect x="806" y="398" width="88" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="850" y="407" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">DECIDE</text>
+
+      <!-- 9. Agent --> n8n (return) -->
+      <line x1="951" y1="458" x2="748" y2="458" stroke="#4f5d75" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+      <rect x="806" y="438" width="88" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="850" y="447" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">VERDICT</text>
+
+      <!-- 10. n8n -> Supabase -->
+      <line x1="732" y1="498" x2="524" y2="498" stroke="#4f5d75" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <rect x="580" y="478" width="112" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="636" y="487" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">RESULT + ALERT</text>
+
+      <!-- 11. App -> Patient — headline success -->
+      <line x1="296" y1="546" x2="104" y2="546" stroke="#eb6c36" stroke-width="1.8" marker-end="url(#arrow-accent)"/>
+      <rect x="146" y="526" width="108" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="200" y="535" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">RESULT ON SCREEN</text>
+
+      <!-- ============ ACTIVATION BARS ============ -->
+      <rect x="296" y="130" width="8" height="430" fill="rgba(45,49,66,0.06)" stroke="#4f5d75" stroke-width="0.8"/>
+      <rect x="736" y="214" width="8" height="296" fill="rgba(45,49,66,0.06)" stroke="#4f5d75" stroke-width="0.8"/>
+      <rect x="951" y="418" width="8" height="44" fill="rgba(45,49,66,0.06)" stroke="#4f5d75" stroke-width="0.8"/>
+
+      <!-- ============ ACTORS ============ -->
+
+      <rect x="15" y="36" width="170" height="48" rx="6" fill="#f5f5f5"/>
+      <rect x="15" y="36" width="170" height="48" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+      <text x="100" y="58" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Patient</text>
+      <text x="100" y="73" fill="#7a8399" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">phone, 390px</text>
+
+      <rect x="215" y="36" width="170" height="48" rx="6" fill="#f5f5f5"/>
+      <rect x="215" y="36" width="170" height="48" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1.2"/>
+      <text x="300" y="58" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Jur'ah app</text>
+      <text x="300" y="73" fill="#7a8399" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/api/runs</text>
+
+      <rect x="435" y="36" width="170" height="48" rx="6" fill="#f5f5f5"/>
+      <rect x="435" y="36" width="170" height="48" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+      <text x="520" y="58" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Supabase</text>
+      <text x="520" y="73" fill="#7a8399" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">postgres + RLS</text>
+
+      <rect x="655" y="36" width="170" height="48" rx="6" fill="#f5f5f5"/>
+      <rect x="655" y="36" width="170" height="48" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <text x="740" y="58" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">n8n workflow</text>
+      <text x="740" y="73" fill="#7a8399" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/webhook/ — live</text>
+
+      <rect x="870" y="36" width="170" height="48" rx="6" fill="#f5f5f5"/>
+      <rect x="870" y="36" width="170" height="48" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <text x="955" y="58" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Decision agent</text>
+      <text x="955" y="73" fill="#7a8399" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">guardrails G1–G8</text>
+
+      <!-- ============ LEGEND ============ -->
+      <line x1="30" y1="642" x2="1030" y2="642" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="30" y="660" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+
+      <line x1="108" y1="656" x2="148" y2="656" stroke="#4f5d75" stroke-width="1.5"/>
+      <text x="158" y="660" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">CALL</text>
+
+      <line x1="240" y1="656" x2="280" y2="656" stroke="#4f5d75" stroke-width="1.5" stroke-dasharray="5,4"/>
+      <text x="290" y="660" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">RETURN</text>
+
+      <line x1="400" y1="656" x2="440" y2="656" stroke="#2e5aa8" stroke-width="1.5"/>
+      <text x="450" y="660" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">SERVER-TO-SERVER, SECRET HELD SERVER-SIDE</text>
+
+      <line x1="810" y1="656" x2="850" y2="656" stroke="#eb6c36" stroke-width="1.8"/>
+      <text x="860" y="660" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">WHAT THE USER CAME FOR</text>
+    </svg>
+  </div>
+</body>
+</html>

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="How the three-person Jur'ah team builds the app in five days: roles, the daily loop, the rules, and copy-paste master prompts for each person.">
+  <title>Jur'ah Team Playbook</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+  <style>
+    html { -webkit-text-size-adjust: 100%; }
+    img { max-width: 100%; }
+    [hidden] { display: none !important; }
+    :root {
+      --paper: #f4f5f7;
+      --card: #ffffff;
+      --ink: #2d3142;
+      --muted: #5b667c;
+      --faint: #8a93a6;
+      --rule: rgba(45,49,66,0.14);
+      --accent: #e0612b;
+      --accent-ink: #ffffff;
+      --accent-soft: rgba(224,97,43,0.10);
+      --ok: #2e7d5b;
+      --ok-soft: rgba(46,125,91,0.12);
+      --warn: #b7791f;
+      --warn-soft: rgba(183,121,31,0.13);
+      --stop: #b3261e;
+      --stop-soft: rgba(179,38,30,0.10);
+      --code-bg: #eceef2;
+      --a-lane: #3b6ea5; --b-lane: #6b4fa0; --c-lane: #2e8a6d; --boss-lane: #e0612b;
+      --sans: 'Geist', system-ui, -apple-system, sans-serif;
+      --serif: 'Instrument Serif', Georgia, serif;
+      --mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --paper: #16181f; --card: #1e2129; --ink: #e8eaf0; --muted: #a9b0c2; --faint: #7a8296;
+        --rule: rgba(232,234,240,0.14); --accent: #f0764a; --accent-ink: #1a0d07; --accent-soft: rgba(240,118,74,0.16);
+        --ok: #5fc39a; --ok-soft: rgba(95,195,154,0.14); --warn: #e0a84a; --warn-soft: rgba(224,168,74,0.15);
+        --stop: #ef6b63; --stop-soft: rgba(239,107,99,0.14); --code-bg: #12141a;
+        --a-lane: #7fb0e6; --b-lane: #b39ae6; --c-lane: #6fcaa8; --boss-lane: #f0764a;
+      }
+    }
+    :root[data-theme="dark"] {
+      --paper: #16181f; --card: #1e2129; --ink: #e8eaf0; --muted: #a9b0c2; --faint: #7a8296;
+      --rule: rgba(232,234,240,0.14); --accent: #f0764a; --accent-ink: #1a0d07; --accent-soft: rgba(240,118,74,0.16);
+      --ok: #5fc39a; --ok-soft: rgba(95,195,154,0.14); --warn: #e0a84a; --warn-soft: rgba(224,168,74,0.15);
+      --stop: #ef6b63; --stop-soft: rgba(239,107,99,0.14); --code-bg: #12141a;
+      --a-lane: #7fb0e6; --b-lane: #b39ae6; --c-lane: #6fcaa8; --boss-lane: #f0764a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.6; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 2.5rem; max-width: 1120px; margin: 0 auto; padding-block: 2rem 5rem; padding-inline: 20px; }
+    @media (max-width: 860px) { .shell { grid-template-columns: 1fr; gap: 1rem; } }
+
+    nav.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 1rem); align-self: start; }
+    @media (max-width: 860px) { nav.rail { position: static; } }
+    nav.rail .brand { font-family: var(--serif); font-size: 1.5rem; line-height: 1.1; margin: 0 0 0.25rem; }
+    nav.rail .brand span { color: var(--faint); font-family: var(--sans); font-size: 0.8rem; display: block; margin-top: 0.2rem; }
+    nav.rail ol { list-style: none; margin: 1.25rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+    @media (max-width: 860px) { nav.rail ol { flex-direction: row; flex-wrap: wrap; gap: 0.35rem; } }
+    nav.rail a { display: block; color: var(--muted); font-size: 0.875rem; padding: 0.3rem 0.5rem; border-radius: 4px; border-left: 2px solid transparent; }
+    nav.rail a:hover { color: var(--ink); background: var(--card); text-decoration: none; }
+    @media (max-width: 860px) { nav.rail a { border: 1px solid var(--rule); background: var(--card); border-left: 1px solid var(--rule); } }
+
+    main { min-width: 0; }
+    header.hero h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.05; letter-spacing: -0.015em; margin: 0 0 0.75rem; text-wrap: balance; }
+    header.hero .lede { font-size: 1.125rem; color: var(--muted); max-width: 60ch; margin: 0; }
+    .eyebrow { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin: 0 0 0.5rem; }
+    .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin: 1.75rem 0 0; }
+    .fact { border-top: 2px solid var(--ink); padding-top: 0.5rem; }
+    .fact b { display: block; font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .fact span { color: var(--muted); font-size: 0.85rem; }
+
+    section { margin-top: 3.5rem; scroll-margin-top: 1rem; }
+    section > h2 { font-family: var(--serif); font-weight: 400; font-size: 2rem; line-height: 1.15; margin: 0 0 0.5rem; letter-spacing: -0.01em; text-wrap: balance; }
+    section > .sub { color: var(--muted); margin: 0 0 1.5rem; max-width: 65ch; }
+    h3 { font-size: 1.05rem; font-weight: 600; margin: 1.75rem 0 0.5rem; }
+    p { max-width: 68ch; }
+    ul, ol { padding-left: 1.3rem; max-width: 68ch; }
+    li { margin: 0.3rem 0; }
+    code { font-family: var(--mono); font-size: 0.86em; background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 3px; }
+
+    .grid { display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+    .card { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 1rem 1.1rem; }
+    .card h4 { margin: 0 0 0.35rem; font-size: 1rem; font-weight: 600; }
+    .card p { margin: 0; font-size: 0.925rem; color: var(--muted); }
+    .card ul { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.925rem; }
+    .lane-a { border-top: 3px solid var(--a-lane); }
+    .lane-b { border-top: 3px solid var(--b-lane); }
+    .lane-c { border-top: 3px solid var(--c-lane); }
+    .lane-boss { border-top: 3px solid var(--boss-lane); }
+    .chip { display: inline-block; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.1rem 0.45rem; border-radius: 3px; border: 1px solid var(--rule); color: var(--muted); vertical-align: middle; }
+    .chip.a { color: var(--a-lane); border-color: currentColor; }
+    .chip.b { color: var(--b-lane); border-color: currentColor; }
+    .chip.c { color: var(--c-lane); border-color: currentColor; }
+    .chip.boss { color: var(--boss-lane); border-color: currentColor; }
+
+    /* flow */
+    .flow { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: stretch; margin: 1rem 0; }
+    .flow .step { flex: 1 1 150px; background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 0.75rem 0.9rem; position: relative; }
+    .flow .step .n { font-family: var(--mono); font-size: 0.7rem; color: var(--faint); letter-spacing: 0.1em; }
+    .flow .step b { display: block; font-size: 0.95rem; margin: 0.15rem 0; }
+    .flow .step span { font-size: 0.85rem; color: var(--muted); }
+    .flow .step.gate { border-color: var(--stop); background: var(--stop-soft); }
+    .flow .step.boss { border-left: 3px solid var(--boss-lane); }
+
+    /* tables */
+    .tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--card); }
+    table { border-collapse: collapse; width: 100%; font-size: 0.925rem; }
+    th, td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+    th { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); font-weight: 500; }
+    tr:last-child td { border-bottom: 0; }
+    td code { white-space: nowrap; }
+
+    /* callouts */
+    .note { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 0.75rem 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0; max-width: 72ch; }
+    .note.stop { border-color: var(--stop); background: var(--stop-soft); }
+    .note.ok { border-color: var(--ok); background: var(--ok-soft); }
+    .note.warn { border-color: var(--warn); background: var(--warn-soft); }
+    .note p { margin: 0; }
+    .note p + p { margin-top: 0.5rem; }
+    .note b.lbl { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 0.25rem; }
+    .note.stop b.lbl { color: var(--stop); } .note.ok b.lbl { color: var(--ok); } .note.warn b.lbl { color: var(--warn); } .note b.lbl { color: var(--accent); }
+
+    /* tabs */
+    .tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1.25rem 0 1rem; }
+    .tabs button { font: inherit; font-size: 0.9rem; font-weight: 500; background: var(--card); color: var(--muted); border: 1px solid var(--rule); border-radius: 999px; padding: 0.4rem 0.95rem; cursor: pointer; }
+    .tabs button[aria-selected="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .tabs button:hover { color: var(--ink); }
+    .tabs button[aria-selected="true"]:hover { color: var(--paper); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* prompt blocks */
+    .prompt { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; margin: 1rem 0; overflow: hidden; }
+    .prompt .head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--rule); }
+    .prompt .head .t { font-size: 0.9rem; font-weight: 600; }
+    .prompt .head .when { font-size: 0.8rem; color: var(--muted); display: block; font-weight: 400; }
+    .prompt pre { margin: 0; padding: 0.9rem 1rem; font-family: var(--mono); font-size: 0.82rem; line-height: 1.55; white-space: pre-wrap; word-break: break-word; color: var(--ink); background: var(--code-bg); }
+    .copy { font: inherit; font-size: 0.78rem; font-weight: 500; font-family: var(--mono); background: var(--card); color: var(--ink); border: 1px solid var(--rule); border-radius: 4px; padding: 0.3rem 0.65rem; cursor: pointer; white-space: nowrap; flex: 0 0 auto; }
+    .copy:hover { border-color: var(--accent); color: var(--accent); }
+    .copy.done { background: var(--ok-soft); color: var(--ok); border-color: var(--ok); }
+
+    /* week */
+    .week { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; }
+    .day { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 0.9rem 1rem; }
+    .day .d { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
+    .day h4 { margin: 0.2rem 0 0.6rem; font-size: 1rem; }
+    .day dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 0.6rem; font-size: 0.875rem; }
+    .day dt { font-family: var(--mono); font-size: 0.72rem; padding-top: 0.15rem; }
+    .day dt.a { color: var(--a-lane); } .day dt.b { color: var(--b-lane); } .day dt.c { color: var(--c-lane); } .day dt.boss { color: var(--boss-lane); }
+    .day dd { margin: 0; color: var(--muted); }
+    .day.demo { border-color: var(--accent); background: var(--accent-soft); }
+
+    .kv { display: grid; grid-template-columns: max-content 1fr; gap: 0.4rem 1rem; font-size: 0.925rem; max-width: 72ch; }
+    .kv dt { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); padding-top: 0.1rem; }
+    .kv dd { margin: 0; }
+    @media (max-width: 520px) { .kv { grid-template-columns: 1fr; gap: 0.1rem 0; } .kv dd { margin-bottom: 0.5rem; } }
+
+    .safety { margin-top: 4rem; padding-top: 1.25rem; border-top: 1px solid var(--rule); font-size: 0.85rem; color: var(--muted); }
+    .safety p { margin: 0.25rem 0; }
+    .safety .ar { direction: rtl; text-align: right; font-size: 0.95rem; }
+    @media (prefers-reduced-motion: no-preference) { .copy { transition: color .15s, border-color .15s, background .15s; } }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="rail" aria-label="Sections">
+    <p class="brand">Jur'ah <span>Team playbook · جرعة</span></p>
+    <ol>
+      <li><a href="#start">Start here</a></li>
+      <li><a href="#team">Who does what</a></li>
+      <li><a href="#flow">How work moves</a></li>
+      <li><a href="#day">Your day</a></li>
+      <li><a href="#week">The week</a></li>
+      <li><a href="#rules">Rules that never bend</a></li>
+      <li><a href="#prompts">Master prompts</a></li>
+      <li><a href="#change">Changing the plan</a></li>
+      <li><a href="#trouble">When something breaks</a></li>
+      <li><a href="#tables">The ten tables</a></li>
+      <li><a href="#docs">The documents</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero" id="start">
+      <p class="eyebrow">AIFC-Sep · Capstone · Demo Day Thursday 24 September 2026, 09:00</p>
+      <h1>How we build Jur'ah together in five days</h1>
+      <p class="lede">Three people. Four Claude sessions. One rule for everything: plan it, build it, prove it. This page tells you exactly what to do, in what order, and what to type. Everything here comes from the documents in the repo, so when they change, this page changes.</p>
+      <div class="facts">
+        <div class="fact"><b>3</b><span>people, one lane each</span></div>
+        <div class="fact"><b>5</b><span>build days, Sat 19 → Wed 23</span></div>
+        <div class="fact"><b>28</b><span>judged items, all required</span></div>
+        <div class="fact"><b>1</b><span>command you type: <code>/work</code></span></div>
+      </div>
+
+      <div class="note" style="margin-top:1.75rem">
+        <b class="lbl">What Jur'ah is, in three lines</b>
+        <p>A patient keeps every prescription they hold, from any clinic or hospital, in one profile. They see today's doses and mark them taken or skipped. When a dose is missed, an agent checks whether it can safely be caught up. It proposes a new time the patient accepts, or it refuses and tells the doctor. Every change is written to an audit trail.</p>
+      </div>
+    </header>
+
+    <!-- TEAM -->
+    <section id="team">
+      <h2>Who does what</h2>
+      <p class="sub">Each person owns one lane and one branch. The lead's machine also runs the boss session, which is the only thing that touches <code>main</code>. You never touch another lane's files. If you need one, you write it down as a dependency and keep going.</p>
+
+      <div class="grid">
+        <div class="card lane-boss">
+          <h4>Boss <span class="chip boss">main</span></h4>
+          <p>Runs on the lead's laptop on a timer. Never writes a feature. Merges cleared pull requests, runs the three gates, reverts if a gate goes red, keeps the lane branches current, ticks the checklist.</p>
+          <ul><li>Commands: <code>/ship</code> every 45 min, <code>/close</code> at 23:00</li><li>Owns: <code>CLAUDE.md</code>, checklist, technical plan, CI, skills</li></ul>
+        </div>
+        <div class="card lane-a">
+          <h4>Owner A — Data &amp; security <span class="chip a">a/data</span></h4>
+          <p>The database, the row-level security policies, the isolation test, validation, the seed. Everything else is built on top of this, so Saturday morning is yours alone.</p>
+          <ul><li>Owns: <code>supabase/**</code>, <code>src/lib/supabase</code>, <code>src/lib/validation</code>, <code>verify-rls.ts</code>, <code>seed-auth.ts</code></li><li>Judged items: BE-1, BE-2, BE-4, SE-1, SE-2, SE-3, SE-5</li></ul>
+        </div>
+        <div class="card lane-b">
+          <h4>Owner B — Front end &amp; ship <span class="chip b">b/ui</span></h4>
+          <p>Every screen, in Arabic and English, on a phone first. The safety line on every page. The Playwright check that walks the live site. The README.</p>
+          <ul><li>Owns: <code>src/app/(app)</code>, <code>src/app/(auth)</code>, <code>src/components</code>, <code>src/i18n</code>, <code>verify-ui.ts</code>, <code>README.md</code></li><li>Judged items: FE-1 to FE-5, SE-4, SH-1 to SH-4</li></ul>
+        </div>
+        <div class="card lane-c">
+          <h4>Owner C — Agent &amp; demo <span class="chip c">c/agent</span></h4>
+          <p>The API route the button calls, the n8n workflows, the numbered guardrails, the rehearsals. You are the one who draws the agent on a whiteboard from memory.</p>
+          <ul><li>Owns: <code>src/app/api/**</code>, <code>n8n/**</code>, <code>docs/**</code> (most of it)</li><li>Judged items: AU-1 to AU-6, SH-5</li></ul>
+        </div>
+      </div>
+
+      <h3>Two items are shared</h3>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Item</th><th>Primary</th><th>Consumer</th></tr></thead>
+        <tbody>
+          <tr><td><b>BE-5</b> every run leaves a row</td><td>C writes the run row</td><td>A reviews its policy</td></tr>
+          <tr><td><b>AU-2</b> start, watch, read the result</td><td>B builds the button and status</td><td>C provides <code>POST /api/runs</code></td></tr>
+          <tr><td><b>SE-6</b> the AI security audit</td><td>Boss runs it</td><td>The lane owning each fix</td></tr>
+          <tr><td><b>D30</b> the audit trail</td><td>A owns the table and triggers</td><td>B shows it on screen</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- FLOW -->
+    <section id="flow">
+      <h2>How work moves from your laptop to the live site</h2>
+      <p class="sub">You never merge, pull, rebase or open a pull request by hand. <code>/work</code> does your side. <code>/ship</code> does the boss's side. This is the whole path.</p>
+      <div class="flow">
+        <div class="step"><span class="n">01 · you</span><b>/work picks a task</b><span>from your plan file, builds it inside your lane</span></div>
+        <div class="step"><span class="n">02 · you</span><b>Proves it</b><span>runs the test, <code>npm run build</code>, shows you the real output</span></div>
+        <div class="step"><span class="n">03 · you</span><b>Reviewer subagent</b><span>checks the diff against the checklist until it says SAFE TO MERGE</span></div>
+        <div class="step"><span class="n">04 · you</span><b>Commit, push, PR</b><span>under your own name, on your own branch</span></div>
+        <div class="step boss"><span class="n">05 · boss</span><b>CI + integrator judge it</b><span>MERGE, MERGE AFTER, or DO NOT MERGE with the exact fix</span></div>
+        <div class="step boss"><span class="n">06 · boss</span><b>Merge to main</b><span>squash, then Vercel deploys</span></div>
+        <div class="step gate"><span class="n">07 · boss</span><b>Three gates on the live site</b><span>build · verify:rls · verify:ui. Red → the merge is reverted at once</span></div>
+        <div class="step boss"><span class="n">08 · boss</span><b>main flows back to you</b><span>merged into a/data, b/ui, c/agent. Checklist ticked from main only</span></div>
+      </div>
+      <div class="note ok">
+        <b class="lbl">Why this is safe</b>
+        <p>The boss can merge without a human because it can also revert without a human. <code>main</code> is never left broken between two runs. Your branch always has the latest <code>main</code> before you start the next task.</p>
+      </div>
+    </section>
+
+    <!-- DAY -->
+    <section id="day">
+      <h2>Your day, from start to finish</h2>
+      <p class="sub">The same shape every day. It is short on purpose.</p>
+      <ol>
+        <li><b>Open a terminal in the repo.</b> Check you are on your branch: <code>git branch --show-current</code>. That is the one git command you may type.</li>
+        <li><b>Type <code>/work</code>.</b> It fetches everyone's latest work, reads your plan, and says in three lines what is done, what is next, and what is blocked. Then it starts the next task without asking.</li>
+        <li><b>Watch for proof, not claims.</b> Every task ends with real output on screen: a test log, a screenshot, a query. If you see "done" without output, say <i>"show me the output"</i>.</li>
+        <li><b>Answer when it stops.</b> It stops for four things only: a credential, a decision about <i>what</i> we build, a task blocked on another lane, or anything that would make the app less safe. The answer to the last one is always no.</li>
+        <li><b>Ten-minute team check, twice a day.</b> Each person reads their three lines aloud: done, next, blocked. Owner C draws the agent flow once a day from memory. Everyone explains their lane once.</li>
+        <li><b>End of day: nothing to do.</b> The boss runs <code>/close</code> at 23:00, scores the checklist, writes the failures log, and posts each lane's first task for tomorrow.</li>
+      </ol>
+      <div class="note warn">
+        <b class="lbl">Every day, without fail</b>
+        <p>Your own name must appear in the commit list every day. Claude commits as whoever the laptop says it is, so set <code>git config --global user.name</code> once and never commit from someone else's machine.</p>
+      </div>
+    </section>
+
+    <!-- WEEK -->
+    <section id="week">
+      <h2>The week at a glance</h2>
+      <p class="sub">A suggested shape. Your plan file is the truth; this is the order that keeps nobody waiting. Anything another lane needs from you goes first.</p>
+      <div class="week">
+        <div class="day">
+          <span class="d">Saturday 19</span><h4>Foundations</h4>
+          <dl>
+            <dt class="boss">Boss</dt><dd>Runs PROMPT 0: project, ten tables, policies, seed, stubs, n8n, Vercel, CI, the loop</dd>
+            <dt class="a">A</dt><dd>Migration, RLS, all seven isolation probes green</dd>
+            <dt class="b">B</dt><dd>Layout, safety line, Arabic/English, the four screens on stubs</dd>
+            <dt class="c">C</dt><dd><code>/api/runs</code>, orchestrator webhook, run-result contract</dd>
+          </dl>
+        </div>
+        <div class="day">
+          <span class="d">Sunday 20</span><h4>The core loop</h4>
+          <dl>
+            <dt class="a">A</dt><dd>Sign-up trigger, Zod validation, seed across three clinics, dose generation</dd>
+            <dt class="b">B</dt><dd>Dashboard with mark taken/skipped, prescriptions list with source badges, add prescription</dd>
+            <dt class="c">C</dt><dd>Reschedule sub-workflow, G1–G8 in a Code node, result contract final</dd>
+          </dl>
+        </div>
+        <div class="day">
+          <span class="d">Monday 21</span><h4>The agent shows its work</h4>
+          <dl>
+            <dt class="a">A</dt><dd>Audit trail readable, depletion view, medications verification policy</dd>
+            <dt class="b">B</dt><dd>Doctor screens: patients, add by civil ID, alerts inbox</dd>
+            <dt class="c">C</dt><dd>Interaction screening and profiler sub-workflows, proposals accepted in app</dd>
+            <dt class="boss">Boss</dt><dd>Security audit run 1 with <code>/cso</code>, findings become lane tasks</dd>
+          </dl>
+        </div>
+        <div class="day">
+          <span class="d">Tuesday 22</span><h4>Full app, first rehearsal</h4>
+          <dl>
+            <dt class="a">A</dt><dd>Fix audit findings, sign-up works first try in a private window</dd>
+            <dt class="b">B</dt><dd>History screen, doctor's medication queue, README with names</dd>
+            <dt class="c">C</dt><dd>Rehearsal 1 end to end on the public URL; lead decides on extraction stretch</dd>
+          </dl>
+        </div>
+        <div class="day">
+          <span class="d">Wednesday 23</span><h4>Rehearse, record, freeze</h4>
+          <dl>
+            <dt class="c">C</dt><dd>Rehearsal 2. Change G3 if it broke, record old value and date. Write what broke</dd>
+            <dt class="boss">Boss</dt><dd>Security audit run 2, failures log, screen recording saved. <b>Freeze at 22:00</b></dd>
+            <dt class="a">A</dt><dd>Nothing new. Only fixes to red gates</dd>
+            <dt class="b">B</dt><dd>Nothing new. Only fixes to red gates</dd>
+          </dl>
+        </div>
+        <div class="day demo">
+          <span class="d">Thursday 24 · 09:00</span><h4>Demo Day</h4>
+          <dl>
+            <dt>All</dt><dd>Public URL on a laptop that did not build it. Each of you explains one part with no slides. Every judged item shown live.</dd>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- RULES -->
+    <section id="rules">
+      <h2>Rules that never bend</h2>
+      <p class="sub">Claude is instructed to follow all of these itself. If it ever offers to break one, the session has gone bad: <code>/clear</code> and start again.</p>
+
+      <div class="grid">
+        <div class="card">
+          <h4>Stop and ask, every time</h4>
+          <ul>
+            <li>A credential you do not have. Never invent one.</li>
+            <li>Dropping a feature to make Thursday. Team's call.</li>
+            <li>Weakening a security policy to make something pass. The feature is wrong, not the policy.</li>
+            <li>Deleting or rewriting work already pushed.</li>
+            <li>After Wednesday 22:00. Nothing merges.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Security</h4>
+          <ul>
+            <li>The service role key never reaches the browser, a commit, or a chat. Only <code>seed-auth.ts</code> touches it.</li>
+            <li>Every table has row-level security on. Every write policy has <code>with check</code>.</li>
+            <li>Every change to patient data lands in <code>audit_log</code> by trigger. Nobody writes it directly.</li>
+            <li>Every typed field is validated on the server with Zod.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>The agent</h4>
+          <ul>
+            <li>It decides <i>which</i> tool to call. It never decides <i>what time</i>. All arithmetic runs in SQL or a Code node.</li>
+            <li>No agent ever writes a prescription. Drafts and proposals wait for a human.</li>
+            <li>Unknown means refuse. Never "probably fine".</li>
+            <li>The browser never calls n8n. It calls <code>/api/runs</code>.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>Never type these</h4>
+          <ul>
+            <li><code>git push --force</code></li>
+            <li><code>git reset --hard</code></li>
+            <li><code>git checkout .</code>, <code>git clean</code></li>
+            <li><code>git rebase</code>. Nobody rebases. The boss merges main into your lane.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="note stop" style="margin-top:1.25rem">
+        <b class="lbl">The one sentence to remember</b>
+        <p>Never say a thing is done. Show the output that proves it. Not a summary of the output. The output.</p>
+      </div>
+    </section>
+
+    <!-- PROMPTS -->
+    <section id="prompts">
+      <h2>Master prompts</h2>
+      <p class="sub">Pick your role. Copy the block. Paste it into Claude Code in the repo folder. Words in angle brackets are for you to fill in.</p>
+
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-tab="all">Everyone</button>
+        <button role="tab" aria-selected="false" data-tab="lead">Lead / Boss</button>
+        <button role="tab" aria-selected="false" data-tab="a">Owner A</button>
+        <button role="tab" aria-selected="false" data-tab="b">Owner B</button>
+        <button role="tab" aria-selected="false" data-tab="c">Owner C</button>
+      </div>
+
+      <!-- EVERYONE -->
+      <div class="panel active" data-panel="all">
+        <h3>Start the day</h3>
+        <div class="prompt"><div class="head"><div class="t">The only command<span class="when">Every morning, and after every task finishes</span></div><button class="copy">Copy</button></div><pre>/work</pre></div>
+
+        <h3>Steer before it starts</h3>
+        <div class="prompt"><div class="head"><div class="t">Set today's priority<span class="when">When another lane is waiting on you</span></div><button class="copy">Copy</button></div><pre>/work
+
+Before you pick the next task: today's priority for my lane is &lt;task&gt;, because Lane &lt;A/B/C&gt; is waiting on it. Reorder .plans/&lt;a|b|c&gt;.md so it comes first, show me the new order, then start it.</pre></div>
+
+        <h3>Add a goal the right way</h3>
+        <div class="prompt"><div class="head"><div class="t">New goal → tasks first, no code yet<span class="when">Whenever someone says "we should also…"</span></div><button class="copy">Copy</button></div><pre>New goal for my lane: &lt;describe it in one or two sentences&gt;.
+
+Do not build anything yet. Add it to .plans/&lt;a|b|c&gt;.md as numbered tasks. For each task give: one line of what it is, the REVIEW-CHECKLIST item or PRODUCT-DECISIONS number it serves, the command or screen that proves it is done, which day, and anything it needs from another lane. If it touches a file outside my lane, write that as a dependency instead of a task. Show me the list and stop.</pre></div>
+
+        <h3>Demand proof</h3>
+        <div class="prompt"><div class="head"><div class="t">Show me, don't tell me<span class="when">Any time you read "done" or "works" with no output under it</span></div><button class="copy">Copy</button></div><pre>Show me the real output that proves this task is done: the full result of its test and of `npm run build`, not a summary. If a screen changed, run the 390px screenshot and show it.</pre></div>
+
+        <h3>Something failed</h3>
+        <div class="prompt"><div class="head"><div class="t">Fix the cause, not the check<span class="when">A red test, a failing build, an error in the terminal</span></div><button class="copy">Copy</button></div><pre>This failed:
+
+&lt;paste the error or the failing output&gt;
+
+Find the root cause and fix it. Do not skip the check, do not comment anything out, do not loosen a policy, a test or an assertion. If the only fix you can find would make something less safe, stop and tell me — that means the feature is wrong. Then run it again and show me the full output.</pre></div>
+
+        <h3>Blocked on another lane</h3>
+        <div class="prompt"><div class="head"><div class="t">Write it down, keep moving<span class="when">The task needs a file you do not own</span></div><button class="copy">Copy</button></div><pre>This task needs &lt;file or thing&gt;, which belongs to Lane &lt;A/B/C&gt;. Do not touch it. Write the dependency in .plans/&lt;a|b|c&gt;.md naming that lane and exactly what I need, mention it in the PR body for the boss, and move on to the next task that is not blocked.</pre></div>
+
+        <h3>Fresh start</h3>
+        <div class="prompt"><div class="head"><div class="t">After correcting it twice on the same thing<span class="when">Type /clear first, then this</span></div><button class="copy">Copy</button></div><pre>/work
+
+Last session got stuck on task &lt;n&gt;: &lt;one line on what went wrong and why&gt;. Read .plans/&lt;a|b|c&gt;.md and docs/memory/&lt;a|b|c&gt;.md, then continue from that task with a different approach. Show me your approach in three lines before you build.</pre></div>
+
+        <h3>Before the demo</h3>
+        <div class="prompt"><div class="head"><div class="t">Explain my lane back to me<span class="when">Tuesday and Wednesday, so you can say it without slides (SH-6)</span></div><button class="copy">Copy</button></div><pre>Explain what my lane built this week as if I have to say it to a judge with no slides and no notes. Plain words, under 150 words. Then ask me three questions a judge might ask about it and let me answer before you tell me if I was right.</pre></div>
+      </div>
+
+      <!-- LEAD -->
+      <div class="panel" data-panel="lead">
+        <div class="note">
+          <b class="lbl">Your two jobs</b>
+          <p>Once: run PROMPT 0 on Saturday (about ninety minutes, mostly unattended). Every day: make sure the boss loop is running, and make the decisions only a human can make: credentials, scope cuts, the extraction stretch on Tuesday.</p>
+        </div>
+
+        <h3>Saturday, once</h3>
+        <div class="prompt"><div class="head"><div class="t">The bootstrap<span class="when">Open PROMPT-0.md, copy the block between the triple backticks, paste it. Do not paste this line.</span></div><button class="copy">Copy</button></div><pre>Open PROMPT-0.md in the repo. Do the three "before you paste it" steps. Then copy the whole block inside the code fence and paste it into a fresh Claude Code session in the repo folder. It will stop to ask you for your teammates' GitHub usernames and to show you SQL before applying it. Approve the SQL only after reading it.</pre></div>
+
+        <div class="prompt"><div class="head"><div class="t">Hand-off to the team<span class="when">Right after PROMPT 0 finishes, if step 14 did not print it clearly</span></div><button class="copy">Copy</button></div><pre>Print as one copyable block for my two teammates: the live URL, the repo URL, the exact .env.local they need — Supabase URL and anon key yes, the four RLS test accounts yes, service role key NO, n8n API key NO, webhook secret NO — and the one line each of them types to start: their branch name and /work.</pre></div>
+
+        <h3>Every 45 minutes and every night</h3>
+        <div class="prompt"><div class="head"><div class="t">Run the loop by hand<span class="when">If the cron job is not installed yet, or you want a report now</span></div><button class="copy">Copy</button></div><pre>/ship</pre></div>
+        <div class="prompt"><div class="head"><div class="t">Nightly close<span class="when">23:00, or whenever the day ends</span></div><button class="copy">Copy</button></div><pre>/close</pre></div>
+
+        <h3>Monday evening and Wednesday</h3>
+        <div class="prompt"><div class="head"><div class="t">The security audit (SE-6)<span class="when">On main, in the boss session</span></div><button class="copy">Copy</button></div><pre>Switch to main and pull. Run /cso against this project. Paste the full report into docs/security-audit.md under today's run, with a table: finding, severity, which lane owns the fix. Do not fix anything yourself. Instead, for each finding write one task into the owning lane's .plans file as a dependency from the boss, and tell me which lane got what. When we have two fixes live, copy them into REVIEW-CHECKLIST.md SE-6.</pre></div>
+
+        <h3>Decisions only you make</h3>
+        <div class="prompt"><div class="head"><div class="t">Record a product decision<span class="when">When the team agrees to change what we build</span></div><button class="copy">Copy</button></div><pre>Add decision D&lt;next number&gt; to PRODUCT-DECISIONS.md: &lt;what we decided and why, in plain words&gt;. If it replaces an older decision, add a one-line "superseded by D&lt;n&gt;" note to that entry — do not delete or renumber anything. Then update every file that the decision changes (CLAUDE.md, docs/technical-plan.md, PROMPT-0.md if it has not run yet) in place, and append one line to docs/memory/boss.md. Show me the diff of each file.</pre></div>
+
+        <div class="prompt"><div class="head"><div class="t">Apply a workflow proposal<span class="when">When a lane wrote one under "## Workflow proposals" in its plan</span></div><button class="copy">Copy</button></div><pre>Read the "## Workflow proposals" section in .plans/a.md, .plans/b.md and .plans/c.md. For each one, tell me: what it changes, whether it makes the loop safer or faster, and whether it weakens any gate. Apply the ones that do not weaken a gate, mark each proposal applied or declined in the plan file, and write one dated line per decision in docs/memory/boss.md.</pre></div>
+
+        <div class="prompt"><div class="head"><div class="t">Wednesday 22:00 freeze<span class="when">Say it once so the boss session knows</span></div><button class="copy">Copy</button></div><pre>It is now past the Wednesday 22:00 freeze. From here merge nothing. Run /ship only for steps 5 and 6 — keep the lanes current and score — and revert anything that turns a gate red. Confirm the freeze is holding in every report.</pre></div>
+      </div>
+
+      <!-- OWNER A -->
+      <div class="panel" data-panel="a">
+        <div class="note">
+          <b class="lbl">Your lane in one line</b>
+          <p>If account B can ever see account A's data, we fail. Everything you build is in service of <code>npm run verify:rls</code> exiting 0 on the live project, every time.</p>
+        </div>
+        <dl class="kv">
+          <dt>You own</dt><dd><code>supabase/**</code> · <code>src/lib/supabase/**</code> · <code>src/lib/validation/**</code> · <code>scripts/verify-rls.ts</code> · <code>scripts/seed-auth.ts</code></dd>
+          <dt>Others wait on you for</dt><dd>the migration (everyone, Saturday morning) · the seed with 25 medicines and 25 interaction pairs across three clinics (Lane C) · <code>audit_log</code> readable through RLS (Lane B, for the history screens)</dd>
+          <dt>Your gate</dt><dd><code>npm run build</code> then <code>npm run verify:rls</code>, both green, before every commit</dd>
+          <dt>Your reference</dt><dd><code>docs/technical-plan.md</code> §2, §3, §4, §5, §8 — the SQL is already written there. Use it, do not redesign it.</dd>
+        </dl>
+
+        <h3>First session</h3>
+        <div class="prompt"><div class="head"><div class="t">Write my plan<span class="when">Saturday, on a/data. This is the one approval of the week.</span></div><button class="copy">Copy</button></div><pre>/work
+
+I am Owner A on a/data. Write .plans/a.md from docs/technical-plan.md sections 2 to 5 and 8, and from the handoff table in section 13. Put first whatever another lane is waiting on: the migration with all ten tables, the policies, the audit trigger, the depletion view, then the seven verify-rls probes, then the seed. Under fifteen tasks, each with its test. Show me and stop for my approval.</pre></div>
+
+        <h3>Working prompts</h3>
+        <div class="prompt"><div class="head"><div class="t">A probe is red<span class="when">verify:rls prints FAIL</span></div><button class="copy">Copy</button></div><pre>verify:rls failed on this probe:
+
+&lt;paste the FAIL lines&gt;
+
+Fix the policy, never the assertion. Show me the policy SQL before you apply it, apply it, run verify:rls again and show me the full output with the check count.</pre></div>
+
+        <div class="prompt"><div class="head"><div class="t">Any migration<span class="when">Before it touches the database</span></div><button class="copy">Copy</button></div><pre>Before applying this migration, show me the full SQL and tell me in one line each: which tables it touches, whether every new table has RLS enabled with at least one policy, whether every write policy has a with check, whether every policy says to authenticated and uses (select auth.uid()), whether every filtered column is indexed, and whether any new table holding patient data has the audit trigger. Then wait for my yes.</pre></div>
+
+        <div class="prompt"><div class="head"><div class="t">Validation for a form (SE-5)<span class="when">When Lane B asks for a schema</span></div><button class="copy">Copy</button></div><pre>Lane B needs a Zod schema for &lt;form name&gt; with these fields: &lt;list&gt;. Write it in src/lib/validation/ so it refuses empty, far too long (5000 characters) and wrong-type values with a short message in both Arabic and English. Add a test that pastes 5000 characters and proves no row is created. Show me the test output.</pre></div>
+      </div>
+
+      <!-- OWNER B -->
+      <div class="panel" data-panel="b">
+        <div class="note">
+          <b class="lbl">Your lane in one line</b>
+          <p>A stranger picks up a phone, sees today's doses with where each one came from, and knows what to press without being told. In Arabic and English, nothing sideways at 390px, the safety line on every screen.</p>
+        </div>
+        <dl class="kv">
+          <dt>You own</dt><dd><code>src/app/(app)/**</code> · <code>src/app/(auth)/**</code> · <code>src/app/layout.tsx</code> · <code>src/components/**</code> · <code>src/i18n/**</code> · <code>scripts/verify-ui.ts</code> · <code>README.md</code></dd>
+          <dt>You wait on</dt><dd>Lane C's <code>run-result.example.json</code> (build the result panel against it Saturday, final Sunday) · Lane C's <code>POST /api/runs</code> · Lane A's <code>audit_log</code> for the history screens</dd>
+          <dt>Your gate</dt><dd><code>npm run build</code> then <code>npm run verify:ui</code> with the 390px screenshots, before every commit</dd>
+          <dt>Your reference</dt><dd><code>PRODUCT-DECISIONS.md</code> D29 (the fifteen routes) · <code>docs/technical-plan.md</code> §9, §10</dd>
+        </dl>
+
+        <h3>First session</h3>
+        <div class="prompt"><div class="head"><div class="t">Write my plan<span class="when">Saturday, on b/ui. This is the one approval of the week.</span></div><button class="copy">Copy</button></div><pre>/work
+
+I am Owner B on b/ui. Write .plans/b.md from PRODUCT-DECISIONS.md D29 and docs/technical-plan.md sections 9 and 10. Order: root layout with the bilingual safety line and RTL, the four checklist screens (/, /sign-in, /dashboard, /prescriptions) with real seeded data, verify-ui at 390px against the public URL, then /prescriptions/add and the source badges, then the doctor screens from the top of the list down, then /history. Every form must show loading, success and error. Under fifteen tasks, each with its test. Show me and stop for my approval.</pre></div>
+
+        <h3>Working prompts</h3>
+        <div class="prompt"><div class="head"><div class="t">A screen<span class="when">Each new page</span></div><button class="copy">Copy</button></div><pre>Build &lt;route&gt; per D29. Rules: data comes from Supabase or /api, never a list typed in the code and never computed in the component; the safety line is inherited from the root layout; every string is in src/i18n in both languages; nothing under 12px; nothing scrolls sideways at 390px; every button is thumb-sized; the form shows loading, success and error. When done, run verify:ui and show me the 390px screenshot in Arabic and in English.</pre></div>
+
+        <div class="prompt"><div class="head"><div class="t">The result panel before the agent exists<span class="when">Saturday afternoon</span></div><button class="copy">Copy</button></div><pre>Build the automation section on /dashboard against docs/contracts/run-result.example.json: a Check my doses button that calls POST /api/runs, a status that changes from waiting to done by polling the runs row, and a result panel that shows either the proposed doses with an Accept button each, or the refusal with its reason in plain words. No guardrail numbers on the patient's screen (D16). Show me it working with the stub endpoint.</pre></div>
+
+        <div class="prompt"><div class="head"><div class="t">The README (SH-3)<span class="when">Tuesday</span></div><button class="copy">Copy</button></div><pre>Write README.md: three lines saying what Jur'ah does for a patient, then our three names with the lane each one owned, then the live URL, then how to run it locally. Nothing else. No badges, no marketing.</pre></div>
+      </div>
+
+      <!-- OWNER C -->
+      <div class="panel" data-panel="c">
+        <div class="note">
+          <b class="lbl">Your lane in one line</b>
+          <p>A judge closes n8n, presses the button in our app, and watches the run finish. You can draw the whole flow on a whiteboard in two minutes and say what sends the decision each way.</p>
+        </div>
+        <dl class="kv">
+          <dt>You own</dt><dd><code>src/app/api/**</code> · <code>n8n/**</code> · <code>docs/**</code> except the boss's files · <code>docs/agent-guardrails.md</code></dd>
+          <dt>Others wait on you for</dt><dd><code>docs/contracts/run-result.example.json</code> final by Sunday morning (Lane B) · <code>POST /api/runs</code> returning <code>{ runId }</code> (Lane B) · <code>docs/api.md</code> kept current</dd>
+          <dt>You wait on</dt><dd>Lane A's seed: 25 medicines, 25 interaction pairs, a clash that spans two clinics</dd>
+          <dt>Your reference</dt><dd><code>docs/agent-guardrails.md</code> G1–G11 · <code>docs/technical-plan.md</code> §6, §7 · D22, D23</dd>
+        </dl>
+
+        <h3>First session</h3>
+        <div class="prompt"><div class="head"><div class="t">Write my plan<span class="when">Saturday, on c/agent. This is the one approval of the week.</span></div><button class="copy">Copy</button></div><pre>/work
+
+I am Owner C on c/agent. Write .plans/c.md from docs/technical-plan.md sections 6 and 7, docs/agent-guardrails.md, and PRODUCT-DECISIONS.md D22. Order: finish POST /api/runs so it calls the production n8n webhook with the secret header and reads secrets inside the handler; finalise run-result.example.json for Lane B; the reschedule sub-workflow with G1–G8 in a Code node and one test per guardrail; interaction screening; the profiler writing unverified rows; then docs/api.md. Extraction is a Tuesday stretch — one task at the end marked stretch. Under fifteen tasks, each with its test. Show me and stop for my approval.</pre></div>
+
+        <h3>Working prompts</h3>
+        <div class="prompt"><div class="head"><div class="t">A workflow<span class="when">Each n8n workflow</span></div><button class="copy">Copy</button></div><pre>Create or update the &lt;name&gt; workflow through the n8n API from n8n/&lt;file&gt;.json, never by clicking in the canvas. Activate it, read the production webhook URL back from the activated workflow, and show it to me. If the URL contains /webhook-test/ stop and tell me. Every number in this workflow — times, windows, gaps — must be computed in a Code node, never returned by the model. Show me the Code node.</pre></div>
+
+        <div class="prompt"><div class="head"><div class="t">Prove the guardrails<span class="when">Before the reschedule workflow is called done</span></div><button class="copy">Copy</button></div><pre>Run the catch-up decision function against one case per guardrail: G2 two hours late passes, G3 twice daily with next dose five hours away passes and four times daily refuses, G5 warfarin refuses, G6 anti-seizure inside six hours passes, G7 unverified profile refuses, G4 an interaction clash refuses last. Show me the table of inputs and verdicts. Then run one real press from the app and show me the runs row with its kind, status and result.</pre></div>
+
+        <div class="prompt"><div class="head"><div class="t">Rehearsal<span class="when">Tuesday and Wednesday, on the public URL</span></div><button class="copy">Copy</button></div><pre>Rehearsal &lt;1|2&gt;. Walk the full demo against PUBLIC_SITE_URL with n8n and the Supabase dashboard closed: sign up a new patient, sign in as the seeded patient, mark a dose, press Check my doses, watch the status, read the result, accept a proposal, sign in as the doctor and see the alert and the patient's full list from two clinics, open the history. Write down every step that broke and why. If G3's four hours refused too much or too little, tell me the evidence — the lead records the change in docs/agent-guardrails.md with the old value and the date.</pre></div>
+
+        <div class="prompt"><div class="head"><div class="t">Whiteboard practice (AU-3)<span class="when">Once a day from Sunday</span></div><button class="copy">Copy</button></div><pre>Quiz me on the agent flow. Ask me to describe the trigger, the three steps, the decision point and what sends it each way, without looking. Then tell me what I missed compared with D8 and docs/agent-guardrails.md, in three lines.</pre></div>
+      </div>
+    </section>
+
+    <!-- CHANGE -->
+    <section id="change">
+      <h2>Changing the plan is normal. Working around it is not.</h2>
+      <p class="sub">The plan will be wrong somewhere. That is expected. What is fixed is how it changes, so nothing gets lost and nobody is surprised.</p>
+      <div class="grid">
+        <div class="card">
+          <h4>Your own task list</h4>
+          <p>Yours to change. Reorder, split, reword tasks in <code>.plans/&lt;you&gt;.md</code> and say so in the next PR. Adding a task is fine if it serves a judged item or a numbered decision. Dropping one is a team decision.</p>
+        </div>
+        <div class="card">
+          <h4>A product decision</h4>
+          <p>The lead adds the next <code>D</code> number to <code>PRODUCT-DECISIONS.md</code> and puts a one-line "superseded by" note on the old one. Numbers are never reused. Then the affected files are fixed in place.</p>
+        </div>
+        <div class="card">
+          <h4>The workflow itself</h4>
+          <p>A skill, a reviewer rule, CI, <code>CLAUDE.md</code> in your way? Write the exact change under <code>## Workflow proposals</code> in your plan file, with the task it blocked. The boss applies or declines it on the next <code>/ship</code>.</p>
+        </div>
+        <div class="card">
+          <h4>Something is stale</h4>
+          <p>Fix the text in place. Never add an "amendments" section under the wrong text. Two documents that disagree is a bug to fix, not history to keep.</p>
+        </div>
+      </div>
+      <h3>After Thursday</h3>
+      <p>The web app is the start, not the end. A native app follows, which is why business logic lives in Postgres, n8n and <code>/api/**</code> and never inside a screen. The same routes, the same accounts and the same policies serve the phone app later with nothing rewritten. Anything roadmap is spoken in the pitch, never shown as a dead button.</p>
+    </section>
+
+    <!-- TROUBLE -->
+    <section id="trouble">
+      <h2>When something breaks</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>You see</th><th>What it means</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td>Claude says "done" with no output</td><td>Nothing is proven yet</td><td>Say "show me the output". Every time.</td></tr>
+          <tr><td>Claude offers to disable a test or loosen a policy</td><td>The session has gone bad</td><td>Say no. <code>/clear</code>. Tell the lead.</td></tr>
+          <tr><td>Claude asks you to run a git command</td><td>Something is wrong with the loop</td><td>Do not run it. Tell the lead.</td></tr>
+          <tr><td><code>verify:rls</code> fails on a fresh clone</td><td>A real security finding, not a setup problem</td><td>Post the full output in the group chat before writing any code.</td></tr>
+          <tr><td>Your PR says DO NOT MERGE</td><td>The integrator found a real problem and named the fix</td><td>Read the comment. <code>/work</code> picks it up. Do not argue with the verdict.</td></tr>
+          <tr><td>The boss reverted your merge</td><td>A gate went red on the live site</td><td>The failing output is on the reopened PR. Fix the cause. Never the gate.</td></tr>
+          <tr><td>You corrected Claude twice on the same thing</td><td>The context is full</td><td><code>/clear</code>, then the "Fresh start" prompt above.</td></tr>
+          <tr><td>You think a key leaked</td><td>Two minutes to rotate, or the demo to explain</td><td>Say so in the group chat immediately.</td></tr>
+          <tr><td>The n8n URL contains <code>/webhook-test/</code></td><td>It only listens 120 s with the editor open. The judge closes n8n.</td><td>Stop. Use the production URL read from the activated workflow.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- TABLES -->
+    <section id="tables">
+      <h2>The ten tables, one sentence each</h2>
+      <p class="sub">A judge points at any table and asks "what is one row here?" Every one of us answers in one sentence. Rehearse out loud on Saturday.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Table</th><th>One row is…</th></tr></thead>
+        <tbody>
+          <tr><td><code>profiles</code></td><td>one signed-up person, and whether they are a patient or a doctor</td></tr>
+          <tr><td><code>doctor_patients</code></td><td>one doctor's permission to see one patient</td></tr>
+          <tr><td><code>prescriptions</code></td><td>one medicine one patient is on, and which clinic issued it</td></tr>
+          <tr><td><code>prescription_drafts</code></td><td>one photographed prescription the patient has not yet confirmed</td></tr>
+          <tr><td><code>doses</code></td><td>one scheduled dose at one time, and whether it was taken</td></tr>
+          <tr><td><code>medications</code></td><td>one medicine's reference facts, and who verified them</td></tr>
+          <tr><td><code>interactions</code></td><td>one pair of medicines that must be kept hours apart, and the source saying so</td></tr>
+          <tr><td><code>runs</code></td><td>one press of an automation, and what came out</td></tr>
+          <tr><td><code>alerts</code></td><td>one thing the agent refused to do, and whether the doctor has seen it</td></tr>
+          <tr><td><code>audit_log</code></td><td>one change to somebody's medical data: who made it, when, and what it was before</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- DOCS -->
+    <section id="docs">
+      <h2>The documents, and which one to open</h2>
+      <p class="sub">When two seem to disagree, the higher one wins.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Open this</th><th>When you want</th><th>Who edits it</th></tr></thead>
+        <tbody>
+          <tr><td><code>CLAUDE.md</code></td><td>the rules: what any session may and may not do</td><td>boss</td></tr>
+          <tr><td><code>PRODUCT-DECISIONS.md</code></td><td>why we decided something, numbered D1 to D31</td><td>lead</td></tr>
+          <tr><td><code>docs/technical-plan.md</code></td><td>the how: schema SQL, policies, routes, n8n topology, who waits on whom</td><td>boss</td></tr>
+          <tr><td><code>docs/agent-guardrails.md</code></td><td>the agent's numbered rules G1–G11 and each tool's limits</td><td>Owner C</td></tr>
+          <tr><td><code>REVIEW-CHECKLIST.md</code></td><td>the 28 judged items and how each is tested</td><td>boss ticks it</td></tr>
+          <tr><td><code>SETUP.md</code></td><td>to set up your laptop, 15 minutes, once</td><td>boss</td></tr>
+          <tr><td><code>PROMPT-0.md</code></td><td>the one-time bootstrap the lead pastes on Saturday</td><td>lead</td></tr>
+          <tr><td><code>.plans/&lt;you&gt;.md</code></td><td>your own numbered task list with a test per task</td><td>you</td></tr>
+          <tr><td><code>docs/memory/&lt;you&gt;.md</code></td><td>one dated line per decision a later session would otherwise guess</td><td>you, append only</td></tr>
+          <tr><td><code>docs/security-audit.md</code></td><td>the AI security audit findings and the fixes made because of them</td><td>boss</td></tr>
+        </tbody>
+      </table></div>
+      <p style="margin-top:1rem">Every document exists for one reason: three people and four Claude sessions can build the same app without asking each other questions. If a file does not help with that, it gets shorter.</p>
+    </section>
+
+    <footer class="safety">
+      <p>Student prototype. All data here is sample data. Jur'ah does not give medical advice — always follow your doctor and your pharmacist.</p>
+      <p class="ar" lang="ar">نموذج طلابي. جميع البيانات هنا بيانات تجريبية. «جرعة» لا تقدّم استشارة طبية — اتبع دائماً تعليمات طبيبك والصيدلاني.</p>
+    </footer>
+  </main>
+</div>
+
+<script>
+  (function () {
+    var tabs = document.querySelectorAll('.tabs [role="tab"]');
+    var panels = document.querySelectorAll('.panel');
+    function show(name) {
+      tabs.forEach(function (t) { t.setAttribute('aria-selected', String(t.dataset.tab === name)); });
+      panels.forEach(function (p) { p.classList.toggle('active', p.dataset.panel === name); });
+      try { localStorage.setItem('jurah-playbook-tab', name); } catch (e) {}
+    }
+    tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.tab); }); });
+    try { var saved = localStorage.getItem('jurah-playbook-tab'); if (saved) show(saved); } catch (e) {}
+
+    document.querySelectorAll('.copy').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var pre = btn.closest('.prompt').querySelector('pre');
+        var text = pre.textContent;
+        function done(ok) {
+          btn.textContent = ok ? 'Copied' : 'Select and copy';
+          btn.classList.toggle('done', ok);
+          setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 1800);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+        } else {
+          var r = document.createRange(); r.selectNodeContents(pre);
+          var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+          done(false);
+        }
+      });
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# .githooks/pre-commit — blocks the two commits that fail a MUST item.
+#
+# Enable once per clone:   git config core.hooksPath .githooks
+# Bypass in an emergency:  git commit --no-verify   (then tell the team)
+
+set -uo pipefail
+
+RED=$'\033[31m'; YEL=$'\033[33m'; OFF=$'\033[0m'
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+
+fail=0
+
+# --- 1. no env files, ever (except the committed example) -------------------
+while IFS= read -r f; do
+  case "$f" in
+    .env.example) ;;
+    .env|.env.*|*/.env|*/.env.*)
+      echo "${RED}BLOCKED${OFF} $f is an environment file and must never be committed."
+      fail=1
+      ;;
+  esac
+done <<< "$staged"
+
+# --- 2. no secrets in content ------------------------------------------------
+# Files allowed to mention these strings because they exist to talk about them.
+allow='^(scripts/verify-rls\.ts|\.githooks/pre-commit|\.env\.example|CLAUDE\.md|REVIEW-CHECKLIST\.md|SETUP\.md)$'
+
+patterns=(
+  'eyJ[A-Za-z0-9_-]\{20,\}'                 # a JWT — Supabase keys look like this
+  'sb_secret_[A-Za-z0-9]'                   # Supabase secret key
+  'SUPABASE_SERVICE_ROLE_KEY[[:space:]]*=[[:space:]]*[^[:space:]]'
+  'N8N_WEBHOOK_SECRET[[:space:]]*=[[:space:]]*[^[:space:]]'
+  '-----BEGIN[A-Z ]*PRIVATE KEY-----'
+)
+
+while IFS= read -r f; do
+  [ -f "$f" ] || continue
+  echo "$f" | grep -qE "$allow" && continue
+  for p in "${patterns[@]}"; do
+    if git show ":$f" 2>/dev/null | grep -qi -e "$p"; then
+      echo "${RED}BLOCKED${OFF} $f looks like it contains a secret (matched: $p)"
+      fail=1
+    fi
+  done
+done <<< "$staged"
+
+# --- 3. warn on the n8n test webhook ----------------------------------------
+# Only in places a real URL could live. The docs mention the test URL on
+# purpose, to say never to use it, and must not trigger this.
+code='^(src/|n8n/|scripts/|\.github/|\.env)|\.(json|ts|tsx|js|mjs|yml|yaml)$'
+while IFS= read -r f; do
+  [ -f "$f" ] || continue
+  [ "$f" = ".env.example" ] && continue   # it explains the rule in a comment
+  echo "$f" | grep -qE "$code" || continue
+  if git show ":$f" 2>/dev/null | grep -q '/webhook-test/'; then
+    echo "${YEL}WARNING${OFF} $f uses an n8n TEST webhook URL."
+    echo "        The test URL only listens for 120 seconds with the editor open."
+    echo "        The judge closes n8n and presses your button. Use the production URL."
+  fi
+done <<< "$staged"
+
+if [ "$fail" -ne 0 ]; then
+  echo ""
+  echo "Commit refused. A key in the history is a failed MUST item, and"
+  echo "'git rm' does not remove it from the history. Fix it now, not later."
+  exit 1
+fi
+
+exit 0

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jur'ah — the patient's first day</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper: #f5f5f5; --color-ink: #2d3142; --color-muted: #4f5d75; --color-accent: #eb6c36;
+      --font-sans: 'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', serif;
+      --font-mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink); padding: 3rem 2rem; }
+    .frame { max-width: 1260px; margin: 0 auto; }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem); font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; }
+    .lede { color: var(--color-muted); margin: 0.6rem 0 1.5rem; max-width: 66ch; font-size: 0.9rem; }
+    svg { width: 100%; min-width: 900px; display: block; }
+    footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(45,49,66,0.12); font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-muted); }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Jur'ah · جرعة · user journey</p>
+    <h1>The patient's first day</h1>
+    <p class="lede">One persona, five stages. The dip at stage four is not a usability problem to design away &mdash; it is the moment the product exists to answer, and every screen before it is there to make the answer possible.</p>
+
+    <svg viewBox="0 0 1220 524" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="patient-journey-title patient-journey-desc">
+      <title id="patient-journey-title">The patient's first day</title>
+      <desc id="patient-journey-desc">User journey map of a Jur'ah patient across five stages, from opening the public link to reading the agent's verdict on a missed dose, with confidence falling to its lowest point at the missed dose and recovering once the agent gives a cited reason.</desc>
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+        <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+      <!-- ===== stage headers ===== -->
+      <text x="164" y="28" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.16em">STAGE 1</text>
+      <text x="164" y="48" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Opens the link</text>
+      <text x="388" y="28" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.16em">STAGE 2</text>
+      <text x="388" y="48" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Adds what they take</text>
+      <text x="612" y="28" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.16em">STAGE 3</text>
+      <text x="612" y="48" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Sees one list</text>
+      <text x="836" y="28" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.16em">STAGE 4</text>
+      <text x="836" y="48" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Misses the 08:00</text>
+      <text x="1060" y="28" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.16em">STAGE 5</text>
+      <text x="1060" y="48" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Presses Check</text>
+
+      <!-- ===== sentiment band: hairlines + level labels ===== -->
+      <line x1="64" y1="80" x2="1160" y2="80" stroke="rgba(45,49,66,0.10)" stroke-width="1"/>
+      <line x1="64" y1="160" x2="1160" y2="160" stroke="rgba(45,49,66,0.10)" stroke-width="1"/>
+      <line x1="64" y1="240" x2="1160" y2="240" stroke="rgba(45,49,66,0.10)" stroke-width="1"/>
+      <text x="56" y="83" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.10em">HIGH</text>
+      <text x="56" y="163" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.10em">NEUTRAL</text>
+      <text x="56" y="243" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.10em">LOW</text>
+
+      <!-- sentiment curve: muted except the segment falling into the trough -->
+      <polyline points="164,160 388,200 612,120" fill="none" stroke="#4f5d75" stroke-width="1.5" stroke-linejoin="round"/>
+      <polyline points="612,120 836,240" fill="none" stroke="#eb6c36" stroke-width="1.5" stroke-linejoin="round"/>
+      <polyline points="836,240 1060,120" fill="none" stroke="#4f5d75" stroke-width="1.5" stroke-linejoin="round"/>
+
+      <circle cx="164" cy="160" r="5" fill="#f5f5f5" stroke="#4f5d75" stroke-width="1.5"/>
+      <circle cx="388" cy="200" r="5" fill="#f5f5f5" stroke="#4f5d75" stroke-width="1.5"/>
+      <circle cx="612" cy="120" r="5" fill="#f5f5f5" stroke="#4f5d75" stroke-width="1.5"/>
+      <circle cx="836" cy="240" r="5" fill="#eb6c36" stroke="#eb6c36" stroke-width="1.5"/>
+      <circle cx="1060" cy="120" r="5" fill="#f5f5f5" stroke="#4f5d75" stroke-width="1.5"/>
+
+      <!-- ===== ACTIONS row ===== -->
+      <line x1="64" y1="266" x2="1160" y2="266" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="56" y="292" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.14em">ACTIONS</text>
+
+      <text x="164" y="292" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" text-anchor="middle">Reads what Jur'ah is.</text>
+      <text x="164" y="308" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" text-anchor="middle">No sign-in wall.</text>
+
+      <text x="388" y="292" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" text-anchor="middle">Types in the medicines</text>
+      <text x="388" y="308" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" text-anchor="middle">from the other clinic.</text>
+
+      <text x="612" y="292" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" text-anchor="middle">Every medicine, badged</text>
+      <text x="612" y="308" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" text-anchor="middle">with where it came from.</text>
+
+      <text x="836" y="292" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" text-anchor="middle">Wakes at 22:00. The</text>
+      <text x="836" y="308" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" text-anchor="middle">08:00 is still due.</text>
+
+      <text x="1060" y="292" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" text-anchor="middle">Taps Check my doses.</text>
+      <text x="1060" y="308" fill="#2d3142" font-size="12" font-family="'Geist', sans-serif" text-anchor="middle">Reads why, in plain words.</text>
+
+      <!-- pain markers — trough stage only, max 2 -->
+      <rect x="742" y="320" width="188" height="16" rx="2" fill="rgba(235,108,54,0.06)" stroke="rgba(235,108,54,0.50)" stroke-width="0.8" stroke-dasharray="3,3"/>
+      <text x="836" y="331" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.10em">IS IT TOO LATE NOW?</text>
+      <rect x="742" y="342" width="188" height="16" rx="2" fill="rgba(235,108,54,0.06)" stroke="rgba(235,108,54,0.50)" stroke-width="0.8" stroke-dasharray="3,3"/>
+      <text x="836" y="353" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.10em">NOBODY TO ASK AT 22:00</text>
+
+      <!-- ===== TOUCHPOINTS row ===== -->
+      <line x1="64" y1="374" x2="1160" y2="374" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="56" y="398" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.14em">SCREEN</text>
+      <text x="164" y="398" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/ &middot; public</text>
+      <text x="388" y="398" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/prescriptions/add</text>
+      <text x="612" y="398" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/prescriptions</text>
+      <text x="836" y="398" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/dashboard</text>
+      <text x="1060" y="398" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/dashboard &middot; agent</text>
+
+      <!-- ===== PROVES row ===== -->
+      <line x1="64" y1="414" x2="1160" y2="414" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="56" y="438" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.14em">PROVES</text>
+      <text x="164" y="438" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">SH-1 &middot; FE-1</text>
+      <text x="388" y="438" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">D21 aggregation</text>
+      <text x="612" y="438" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">FE-2 &middot; BE-2</text>
+      <text x="836" y="438" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">the problem itself</text>
+      <text x="1060" y="438" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">AU-2 &middot; AU-6 &middot; FE-5</text>
+
+      <!-- ===== legend ===== -->
+      <line x1="30" y1="474" x2="1190" y2="474" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="30" y="494" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+
+      <line x1="110" y1="490" x2="140" y2="490" stroke="#4f5d75" stroke-width="1.5"/>
+      <text x="148" y="494" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">Confidence, five named levels</text>
+
+      <line x1="340" y1="490" x2="370" y2="490" stroke="#eb6c36" stroke-width="1.5"/>
+      <circle cx="378" cy="490" r="4" fill="#eb6c36"/>
+      <text x="390" y="494" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">The trough &mdash; the reason the app exists</text>
+
+      <rect x="700" y="483" width="26" height="14" rx="2" fill="rgba(235,108,54,0.06)" stroke="rgba(235,108,54,0.50)" stroke-width="0.8" stroke-dasharray="3,3"/>
+      <text x="736" y="494" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">What the patient is actually thinking</text>
+    </svg>
+
+    <footer>Generated from PRODUCT-DECISIONS.md D19, D21, D29 &middot; default editorial skin &middot; re-skin once Lane B picks Jur'ah's colours</footer>
+  </div>
+</body>
+</html>

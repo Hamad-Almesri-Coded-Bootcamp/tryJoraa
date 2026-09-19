@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The eight tables</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper: #f5f5f5; --color-ink: #2d3142; --color-muted: #4f5d75; --color-accent: #eb6c36;
+      --font-sans: 'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Noto Serif', serif;
+      --font-mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem;
+    }
+    .frame { max-width: 1280px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 980px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">ER / Data model · Jur'ah</p>
+    <h1>The eight tables, and what one row of each is</h1>
+
+    <svg viewBox="0 0 1140 740" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="data-model-title data-model-desc">
+      <title id="data-model-title">The eight tables of Jur'ah</title>
+      <desc id="data-model-desc">Data model centred on prescriptions: a profile is a doctor or a patient, care links join them, a prescription names one medication for one patient, doses are its scheduled times, runs record each press of the check button, and alerts record what the agent refused to do. Interactions is a public reference table pairing two medications with a minimum gap.</desc>
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+        <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+      <!-- ============ RELATIONSHIP LINES (drawn first) ============ -->
+
+      <!-- 1. profiles — prescriptions -->
+      <line x1="260" y1="320" x2="460" y2="320" stroke="#4f5d75" stroke-width="1.2"/>
+      <text x="272" y="316" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">1</text>
+      <text x="448" y="316" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">N</text>
+      <rect x="300" y="300" width="120" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="360" y="309" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">WRITES / RECEIVES</text>
+
+      <!-- 2. profiles — care_links -->
+      <line x1="160" y1="370" x2="160" y2="500" stroke="#4f5d75" stroke-width="1.2"/>
+      <text x="170" y="384" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">1</text>
+      <text x="170" y="496" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">N</text>
+      <rect x="170" y="429" width="44" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="192" y="438" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">LINKS</text>
+
+      <!-- 3. medications — prescriptions -->
+      <line x1="580" y1="184" x2="580" y2="260" stroke="#4f5d75" stroke-width="1.2"/>
+      <text x="590" y="198" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">1</text>
+      <text x="590" y="256" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">N</text>
+      <rect x="590" y="216" width="48" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="614" y="225" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">IS FOR</text>
+
+      <!-- 4. medications — interactions -->
+      <line x1="700" y1="120" x2="840" y2="120" stroke="#4f5d75" stroke-width="1.2"/>
+      <text x="712" y="116" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">1</text>
+      <text x="828" y="116" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">N</text>
+      <rect x="732" y="100" width="76" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="770" y="109" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">PAIRS WITH</text>
+
+      <!-- 5. prescriptions — doses -->
+      <line x1="700" y1="320" x2="840" y2="320" stroke="#4f5d75" stroke-width="1.2"/>
+      <text x="712" y="316" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">1</text>
+      <text x="828" y="316" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">N</text>
+      <rect x="732" y="300" width="76" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="770" y="309" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">SCHEDULES</text>
+
+      <!-- 6. prescriptions — runs -->
+      <line x1="580" y1="398" x2="580" y2="500" stroke="#4f5d75" stroke-width="1.2"/>
+      <text x="590" y="412" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">1</text>
+      <text x="590" y="496" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">N</text>
+      <rect x="590" y="443" width="64" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="622" y="452" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">CHECKED BY</text>
+
+      <!-- 7. runs — alerts -->
+      <line x1="700" y1="560" x2="840" y2="560" stroke="#4f5d75" stroke-width="1.2"/>
+      <text x="712" y="556" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">1</text>
+      <text x="828" y="556" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end">N</text>
+      <rect x="736" y="540" width="68" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="770" y="549" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">RAISES</text>
+
+      <!-- 8. doses — alerts -->
+      <line x1="960" y1="370" x2="960" y2="500" stroke="#4f5d75" stroke-width="1.2"/>
+      <text x="970" y="384" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">1</text>
+      <text x="970" y="496" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace">N</text>
+      <rect x="970" y="429" width="48" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="994" y="438" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">ABOUT</text>
+
+      <!-- ============ ENTITIES ============ -->
+
+      <!-- medications -->
+      <rect x="460" y="60" width="240" height="124" rx="6" fill="#f5f5f5"/>
+      <rect x="460" y="60" width="240" height="124" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <line x1="460" y1="94" x2="700" y2="94" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+      <rect x="468" y="70" width="42" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="489" y="79" fill="rgba(45,49,66,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ENTITY</text>
+      <text x="520" y="80" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif">medications</text>
+      <text x="472" y="112" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace"># id</text>
+      <text x="472" y="126" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">name</text>
+      <text x="472" y="140" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">catch_up_window_h</text>
+      <text x="472" y="154" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">verified</text>
+      <text x="472" y="168" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">→ verified_by</text>
+
+      <!-- interactions -->
+      <rect x="840" y="60" width="240" height="124" rx="6" fill="#f5f5f5"/>
+      <rect x="840" y="60" width="240" height="124" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <line x1="840" y1="94" x2="1080" y2="94" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+      <rect x="848" y="70" width="52" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="874" y="79" fill="rgba(45,49,66,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">PUBLIC</text>
+      <text x="910" y="80" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif">interactions</text>
+      <text x="852" y="112" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace"># id</text>
+      <text x="852" y="126" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">→ medication_a</text>
+      <text x="852" y="140" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">→ medication_b</text>
+      <text x="852" y="154" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">min_hours_apart</text>
+      <text x="852" y="168" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">source</text>
+
+      <!-- profiles -->
+      <rect x="60" y="260" width="200" height="110" rx="6" fill="#f5f5f5"/>
+      <rect x="60" y="260" width="200" height="110" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <line x1="60" y1="294" x2="260" y2="294" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+      <rect x="68" y="270" width="42" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="89" y="279" fill="rgba(45,49,66,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ENTITY</text>
+      <text x="120" y="280" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif">profiles</text>
+      <text x="72" y="312" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace"># id</text>
+      <text x="72" y="326" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">full_name</text>
+      <text x="72" y="340" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">role</text>
+      <text x="72" y="354" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">civil_id</text>
+
+      <!-- prescriptions — FOCAL -->
+      <rect x="460" y="260" width="240" height="138" rx="6" fill="#f5f5f5"/>
+      <rect x="460" y="260" width="240" height="138" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1.2"/>
+      <line x1="460" y1="294" x2="700" y2="294" stroke="rgba(235,108,54,0.30)" stroke-width="1"/>
+      <rect x="468" y="270" width="42" height="12" rx="2" fill="transparent" stroke="rgba(235,108,54,0.60)" stroke-width="0.8"/>
+      <text x="489" y="279" fill="#eb6c36" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ROOT</text>
+      <text x="520" y="280" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif">prescriptions</text>
+      <text x="472" y="312" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace"># id</text>
+      <text x="472" y="326" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">→ patient_id</text>
+      <text x="472" y="340" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">→ doctor_id</text>
+      <text x="472" y="354" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">→ medication_id</text>
+      <text x="472" y="368" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">strength</text>
+      <text x="472" y="382" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">times_per_day</text>
+
+      <!-- doses -->
+      <rect x="840" y="260" width="240" height="110" rx="6" fill="#f5f5f5"/>
+      <rect x="840" y="260" width="240" height="110" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <line x1="840" y1="294" x2="1080" y2="294" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+      <rect x="848" y="270" width="42" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="869" y="279" fill="rgba(45,49,66,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ENTITY</text>
+      <text x="900" y="280" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif">doses</text>
+      <text x="852" y="312" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace"># id</text>
+      <text x="852" y="326" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">→ prescription_id</text>
+      <text x="852" y="340" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">scheduled_at</text>
+      <text x="852" y="354" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">status</text>
+
+      <!-- care_links -->
+      <rect x="60" y="500" width="200" height="96" rx="6" fill="#f5f5f5"/>
+      <rect x="60" y="500" width="200" height="96" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+      <line x1="60" y1="534" x2="260" y2="534" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+      <rect x="68" y="510" width="42" height="12" rx="2" fill="transparent" stroke="rgba(79,93,117,0.40)" stroke-width="0.8"/>
+      <text x="89" y="519" fill="rgba(79,93,117,0.85)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">JOIN</text>
+      <text x="120" y="520" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif">care_links</text>
+      <text x="72" y="552" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace"># id</text>
+      <text x="72" y="566" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">→ doctor_id</text>
+      <text x="72" y="580" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">→ patient_id</text>
+
+      <!-- runs -->
+      <rect x="460" y="500" width="240" height="124" rx="6" fill="#f5f5f5"/>
+      <rect x="460" y="500" width="240" height="124" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <line x1="460" y1="534" x2="700" y2="534" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+      <rect x="468" y="510" width="42" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="489" y="519" fill="rgba(45,49,66,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ENTITY</text>
+      <text x="520" y="520" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif">runs</text>
+      <text x="472" y="552" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace"># id</text>
+      <text x="472" y="566" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">→ patient_id</text>
+      <text x="472" y="580" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">started_at</text>
+      <text x="472" y="594" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">status</text>
+      <text x="472" y="608" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">result</text>
+
+      <!-- alerts -->
+      <rect x="840" y="500" width="240" height="124" rx="6" fill="#f5f5f5"/>
+      <rect x="840" y="500" width="240" height="124" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <line x1="840" y1="534" x2="1080" y2="534" stroke="rgba(45,49,66,0.12)" stroke-width="1"/>
+      <rect x="848" y="510" width="42" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="869" y="519" fill="rgba(45,49,66,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ENTITY</text>
+      <text x="900" y="520" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif">alerts</text>
+      <text x="852" y="552" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace"># id</text>
+      <text x="852" y="566" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">→ run_id</text>
+      <text x="852" y="580" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">→ prescription_id</text>
+      <text x="852" y="594" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">reason</text>
+      <text x="852" y="608" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">acknowledged</text>
+
+      <!-- ============ LEGEND ============ -->
+      <line x1="30" y1="672" x2="1110" y2="672" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="30" y="690" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+
+      <text x="108" y="690" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace"># PRIMARY KEY</text>
+      <text x="268" y="690" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">→ FOREIGN KEY</text>
+
+      <rect x="428" y="680" width="28" height="14" rx="4" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1.2"/>
+      <text x="466" y="690" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">READABLE BY EXACTLY TWO PEOPLE</text>
+
+      <rect x="768" y="680" width="28" height="14" rx="4" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <text x="806" y="690" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">PUBLIC READ, WRITABLE BY NOBODY</text>
+    </svg>
+  </div>
+</body>
+</html>

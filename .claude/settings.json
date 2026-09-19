@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+
+  "_comment": [
+    "Boss mode. The allow list has to cover everything /ship does, because the",
+    "boss runs headless from cron and a permission prompt there hangs forever.",
+    "The deny list is what actually protects the repo: nothing here can rewrite",
+    "or delete pushed history. Prefix matching is literal, so commands built from",
+    "shell variables (curl \"$N8N_BASE_URL/...\") would not match a URL pattern —",
+    "which is why curl is allowed broadly rather than by host."
+  ],
+
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npm i:*)",
+      "Bash(npm install:*)",
+      "Bash(npm ci)",
+      "Bash(npx create-next-app:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npx playwright:*)",
+      "Bash(npx supabase:*)",
+      "Bash(node:*)",
+
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout -b:*)",
+      "Bash(git switch:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull --no-rebase:*)",
+      "Bash(git merge:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(git revert:*)",
+      "Bash(git push origin:*)",
+      "Bash(git stash:*)",
+      "Bash(git config:*)",
+
+      "Bash(gh pr:*)",
+      "Bash(gh repo:*)",
+      "Bash(gh run:*)",
+      "Bash(gh workflow:*)",
+      "Bash(gh secret set:*)",
+      "Bash(gh api:*)",
+      "Bash(gh auth status)",
+
+      "Bash(vercel:*)",
+      "Bash(curl:*)",
+
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(chmod:*)",
+      "Bash(echo:*)",
+      "Bash(sort:*)",
+      "Bash(date)",
+
+      "Read(./.env.local)",
+      "Edit(./.env.local)",
+      "Write(./.env.local)"
+    ],
+
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --delete:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git checkout .)",
+      "Bash(git clean:*)",
+      "Bash(git filter-branch:*)",
+      "Bash(git rebase:*)",
+      "Bash(rm -rf:*)",
+      "Bash(supabase db reset:*)",
+      "Bash(npx supabase db reset:*)",
+      "Bash(gh repo delete:*)",
+      "Read(./.env)",
+      "Edit(./.env)"
+    ]
+  }
+}

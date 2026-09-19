@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jur'ah — the whole app on one page</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper: #f5f5f5; --color-ink: #2d3142; --color-muted: #4f5d75; --color-accent: #eb6c36;
+      --font-sans: 'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', serif;
+      --font-mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink); padding: 3rem 2rem; }
+    .frame { max-width: 1060px; margin: 0 auto; }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem); font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; }
+    .lede { color: var(--color-muted); margin: 0.6rem 0 1.5rem; max-width: 66ch; font-size: 0.9rem; }
+    svg { width: 100%; min-width: 900px; display: block; }
+    footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(45,49,66,0.12); font-family: var(--font-mono); font-size: 0.68rem; color: var(--color-muted); }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Jur'ah · جرعة · app map</p>
+    <h1>The whole app on one page</h1>
+    <p class="lede">Fourteen routes, two roles, one server path. The only line that leaves the browser goes to our own API &mdash; n8n is never reachable from a page, and the secret that reaches it is never in a bundle.</p>
+
+    <svg viewBox="0 0 1000 760" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="app-map-title app-map-desc">
+      <title id="app-map-title">The whole app on one page</title>
+      <desc id="app-map-desc">Architecture map of Jur'ah showing three public routes, five patient routes and six doctor routes, with the patient dashboard triggering a server API route that calls an n8n orchestrator, which writes results back to Supabase.</desc>
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+        <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+      <!-- ===== zones (drawn first) ===== -->
+      <rect x="64" y="76" width="904" height="100" rx="8" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <rect x="74" y="80" width="128" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="78" y="89" fill="rgba(45,49,66,0.40)" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.14em">PUBLIC · NO SIGN-IN WALL</text>
+
+      <rect x="64" y="200" width="904" height="168" rx="8" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <rect x="74" y="204" width="56" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="78" y="213" fill="rgba(45,49,66,0.40)" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.14em">PATIENT</text>
+
+      <rect x="64" y="392" width="904" height="168" rx="8" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <rect x="74" y="396" width="196" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="78" y="405" fill="rgba(45,49,66,0.40)" font-size="7" font-family="'Geist Mono', monospace" letter-spacing="0.14em">DOCTOR · PROVISIONED, NEVER SELF-SIGNUP</text>
+
+      <!-- ===== arrows (before nodes) ===== -->
+      <!-- the button: /dashboard -> /api/runs, down the left gutter -->
+      <path d="M 76,258 H 48 Q 40,258 40,266 V 584 Q 40,592 48,592 H 222 Q 230,592 230,600 V 610"
+            fill="none" stroke="#eb6c36" stroke-width="1.5" marker-end="url(#arrow-accent)"/>
+      <rect x="48" y="374" width="76" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="86" y="383" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.10em">THE BUTTON</text>
+
+      <!-- server to server -->
+      <line x1="320" y1="644" x2="394" y2="644" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+      <rect x="326" y="624" width="68" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="360" y="633" fill="#2e5aa8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">SECRET HEADER</text>
+
+      <line x1="620" y1="644" x2="694" y2="644" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+      <rect x="628" y="624" width="64" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="660" y="633" fill="#2e5aa8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">WRITE RUN</text>
+
+      <!-- ===== PUBLIC nodes ===== -->
+      <rect x="76" y="108" width="184" height="52" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="168" y="132" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Landing</text>
+      <text x="168" y="148" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/</text>
+
+      <rect x="284" y="108" width="184" height="52" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="376" y="132" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Sign in</text>
+      <text x="376" y="148" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/sign-in</text>
+
+      <rect x="492" y="108" width="184" height="52" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="584" y="132" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Sign up — patients</text>
+      <text x="584" y="148" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/sign-up</text>
+
+      <!-- ===== PATIENT nodes ===== -->
+      <rect x="76" y="232" width="184" height="52" rx="6" fill="#f5f5f5"/>
+      <rect x="76" y="232" width="184" height="52" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="168" y="256" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Today's doses</text>
+      <text x="168" y="272" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/dashboard</text>
+
+      <rect x="284" y="232" width="184" height="52" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="376" y="256" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">My medicines</text>
+      <text x="376" y="272" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/prescriptions</text>
+
+      <rect x="492" y="232" width="184" height="52" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="584" y="256" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">One medicine</text>
+      <text x="584" y="272" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/prescriptions/[id]</text>
+
+      <rect x="76" y="300" width="184" height="52" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="168" y="324" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Add from elsewhere</text>
+      <text x="168" y="340" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/prescriptions/add</text>
+
+      <rect x="284" y="300" width="184" height="52" rx="6" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="376" y="324" fill="#4f5d75" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Accept a draft</text>
+      <text x="376" y="340" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/prescriptions/drafts/[id]</text>
+
+      <!-- ===== DOCTOR nodes ===== -->
+      <rect x="76" y="424" width="184" height="52" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="168" y="448" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">My patients</text>
+      <text x="168" y="464" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/doctor</text>
+
+      <rect x="284" y="424" width="184" height="52" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="376" y="448" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Add a patient</text>
+      <text x="376" y="464" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/doctor/patients/add</text>
+
+      <rect x="492" y="424" width="184" height="52" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="584" y="448" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Their full list</text>
+      <text x="584" y="464" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/doctor/patients/[id]</text>
+
+      <rect x="700" y="424" width="184" height="52" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="792" y="448" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Write a prescription</text>
+      <text x="792" y="464" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/doctor/prescriptions/new</text>
+
+      <rect x="76" y="492" width="184" height="52" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="168" y="516" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Refusals raised</text>
+      <text x="168" y="532" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/doctor/alerts</text>
+
+      <rect x="284" y="492" width="184" height="52" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="376" y="516" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Verify profiles</text>
+      <text x="376" y="532" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/doctor/medications</text>
+
+      <!-- ===== backend strip ===== -->
+      <rect x="140" y="616" width="180" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <rect x="148" y="622" width="28" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="162" y="631" fill="#2d3142" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">API</text>
+      <text x="230" y="650" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Verifies the session</text>
+      <text x="230" y="664" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/api/runs</text>
+
+      <rect x="400" y="616" width="220" height="56" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <rect x="408" y="622" width="28" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="422" y="631" fill="#2d3142" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">N8N</text>
+      <text x="510" y="650" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Orchestrator</text>
+      <text x="510" y="664" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">+ 3 sub-workflow tools</text>
+
+      <rect x="700" y="616" width="200" height="56" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+      <rect x="708" y="622" width="24" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="720" y="631" fill="#2d3142" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">DB</text>
+      <text x="800" y="650" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Supabase</text>
+      <text x="800" y="664" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">9 tables · RLS on every one</text>
+
+      <!-- ===== legend ===== -->
+      <line x1="20" y1="712" x2="968" y2="712" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="20" y="732" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+
+      <rect x="100" y="722" width="22" height="12" rx="3" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="130" y="732" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">The front door, and the only trigger</text>
+
+      <rect x="430" y="722" width="22" height="12" rx="3" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="460" y="732" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">Tuesday stretch — cut without loss</text>
+
+      <line x1="750" y1="728" x2="778" y2="728" stroke="#2e5aa8" stroke-width="1.2"/>
+      <text x="788" y="732" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace">Server only — never the browser</text>
+    </svg>
+
+    <footer>Generated from PRODUCT-DECISIONS.md D29 and CLAUDE.md non-negotiables &middot; default editorial skin</footer>
+  </div>
+</body>
+</html>

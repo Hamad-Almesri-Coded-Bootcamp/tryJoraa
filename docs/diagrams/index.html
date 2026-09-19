@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jur'ah — the plan in nine diagrams</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --paper: #f5f5f5; --ink: #2d3142; --muted: #4f5d75; --accent: #eb6c36;
+      --rule: rgba(45,49,66,0.12);
+      --sans: 'Geist', system-ui, sans-serif;
+      --serif: 'Instrument Serif', serif;
+      --mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--sans); background: var(--paper); color: var(--ink);
+      padding: 4rem 2rem; line-height: 1.6;
+    }
+    .frame { max-width: 860px; margin: 0 auto; }
+    .eyebrow {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem;
+    }
+    h1 { font-family: var(--serif); font-size: 2.25rem; font-weight: 400; letter-spacing: -0.02em; line-height: 1.1; }
+    .lede { color: var(--muted); margin: 0.75rem 0 2.5rem; max-width: 60ch; }
+    a.card {
+      display: block; background: #ffffff; border: 1px solid var(--rule); border-radius: 6px;
+      padding: 1.25rem 1.5rem; margin-bottom: 0.75rem; text-decoration: none; color: inherit;
+      transition: border-color 0.15s ease;
+    }
+    a.card:hover { border-color: var(--accent); }
+    .card-head { display: flex; align-items: baseline; gap: 0.75rem; }
+    .card h2 { font-family: var(--sans); font-size: 1rem; font-weight: 600; }
+    .tag {
+      font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); border: 1px solid var(--rule); border-radius: 2px; padding: 0.1rem 0.35rem;
+    }
+    .card p { font-size: 0.875rem; color: var(--muted); margin-top: 0.35rem; }
+    .items { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); margin-top: 0.5rem; letter-spacing: 0.04em; }
+    .stale {
+      font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: #b4532a; border: 1px dashed rgba(235,108,54,0.5); border-radius: 2px; padding: 0.1rem 0.35rem;
+    }
+    .group {
+      font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--muted); margin: 2rem 0 0.75rem; padding-top: 1rem; border-top: 1px solid var(--rule);
+    }
+    footer {
+      margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--rule);
+      font-family: var(--mono); font-size: 0.7rem; color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Jur'ah · جرعة · planning</p>
+    <h1>The plan, in nine diagrams</h1>
+    <p class="lede">Generated from <code style="font-family:var(--mono);font-size:0.85em">PRODUCT-DECISIONS.md</code> and <code style="font-family:var(--mono);font-size:0.85em">docs/agent-guardrails.md</code>. Each one answers a question a judge is going to ask. Two of them predate decisions D21&ndash;D31 and are marked stale; read the drawing that supersedes each before rehearsing from it.</p>
+
+    <p class="group">How we build it</p>
+
+    <a class="card" href="build-order.html">
+      <div class="card-head"><h2>The five build days</h2><span class="tag">Gantt</span></div>
+      <p>Twelve tasks across three lanes, Saturday to Wednesday, with the freeze line and the one bar everybody else is waiting on. Read this before picking up a task &mdash; it says what is safe to start now and what is not.</p>
+      <p class="items">The plan for the week &middot; the bottleneck is Saturday</p>
+    </a>
+
+    <a class="card" href="app-map.html">
+      <div class="card-head"><h2>The whole app on one page</h2><span class="tag">Architecture</span></div>
+      <p>All fourteen routes, both roles, and the single server path out of the browser. The one line that leaves a page goes to our own API &mdash; n8n is never reachable from the front end.</p>
+      <p class="items">What are we actually building? &middot; D29 &middot; AU-1 &middot; SE-2</p>
+    </a>
+
+    <a class="card" href="route-flow.html">
+      <div class="card-head"><h2>Every route, and who walks it</h2><span class="tag">Swimlane</span></div>
+      <p>The same fourteen routes as the app map, but as the order a user actually walks them: three lanes, one role fork after <code style="font-family:var(--mono);font-size:0.85em">/sign-in</code>, and a single line that crosses from a patient's dashboard into a doctor's inbox.</p>
+      <p class="items">Where does this button take me? &middot; D29 &middot; D19 &middot; FE-1</p>
+    </a>
+
+    <p class="group">How it is used</p>
+
+    <a class="card" href="agent-flow.html">
+      <div class="card-head"><h2>How the agents work</h2><span class="tag">Architecture</span></div>
+      <p>Three bands: the model layer routes and phrases, the deterministic layer computes every number, and a human gate commits. The orchestrator and its four Thursday specialists, drawn to D22 &mdash; <strong>this replaces the framing of the two drawings below</strong>, which both predate it.</p>
+      <p class="items">So what is the LLM actually doing? &middot; D22 &middot; D23 &middot; AU-3 &middot; AU-5</p>
+    </a>
+
+    <a class="card" href="agent-decision.html">
+      <div class="card-head"><h2>How the agent decides a missed dose</h2><span class="tag">Flowchart</span><span class="stale">Stale — no orchestrator</span></div>
+      <p>The tiered rule: an unverified profile refuses, a time-critical medicine refuses, then the two-hour default, the dosing frequency, and the interaction check. Only one path moves a dose, and it asks the patient first. <strong>Predates D22</strong>: redraw before rehearsal, because AU-3 is whiteboarded from this and it has no orchestrator on it.</p>
+      <p class="items">Draw this from memory · AU-3 · AU-4</p>
+    </a>
+
+    <a class="card" href="run-sequence.html">
+      <div class="card-head"><h2>One press of “Check my doses”</h2><span class="tag">Sequence</span></div>
+      <p>What actually happens between the button and the answer — including why the browser never talks to n8n, and where the server-held secret lives.</p>
+      <p class="items">What happens when this button is pressed · SH-6 · AU-1 · BE-5</p>
+    </a>
+
+    <a class="card" href="data-model.html">
+      <div class="card-head"><h2>The eight tables</h2><span class="tag">ER / data model</span><span class="stale">Stale — ten now, see technical-plan.md §2</span></div>
+      <p>Every table and what one row of it is. Prescriptions sits at the centre because it is the row that decides who may read everything else. <strong>Predates D24</strong>: there are nine tables now, and this drawing is missing <code style="font-family:var(--mono);font-size:0.85em">prescription_drafts</code> and the source columns.</p>
+      <p class="items">What is one row here? · BE-3 · SE-1</p>
+    </a>
+
+    <a class="card" href="patient-journey.html">
+      <div class="card-head"><h2>The patient's first day</h2><span class="tag">User journey</span></div>
+      <p>Five stages from the public link to the agent's verdict, now including the stage where a patient adds the prescriptions another clinic gave them. The dip at stage four is the moment the whole product exists to answer.</p>
+      <p class="items">Hand a stranger the phone and say nothing · FE-1 · FE-5 · D21</p>
+    </a>
+
+    <p class="group">How we work</p>
+
+    <a class="card" href="ship-loop.html">
+      <div class="card-head"><h2>How work reaches main</h2><span class="tag">Flowchart</span></div>
+      <p>Three lanes, two review gates, three verification gates, and an automatic revert. Explains the whole week's process to a teammate in one picture.</p>
+      <p class="items">The operating model · SH-2 · SE-1</p>
+    </a>
+
+    <footer>
+      Built with the diagram-design skill · default editorial skin · re-skin once Lane B picks Jur'ah's colours
+    </footer>
+  </div>
+</body>
+</html>
