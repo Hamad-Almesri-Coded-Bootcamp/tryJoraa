@@ -210,6 +210,22 @@ Next sends `no-store` on dynamic routes by default — measured on the live URL,
 not assumed. Nobody chose it. If any authenticated page is ever made static or
 given a `revalidate`, that item breaks silently. Recorded in `security.md` §4.
 
+## A6 — COULD tier, back end + security
+
+The page says *"Never start a COULD while a MUST is open."* Flagged; the team
+chose to bank the ones that need nobody else. None of these are tickable yet.
+
+| COULD | State |
+|---|---|
+| Cleaning log with reasons | ✅ `docs/cleaning-log.md` — every line names the option not taken |
+| Break Room tricks on our own app | ✅ `docs/break-room.md` — five attempts, three findings, all three fixed |
+| Cooldown on the action that calls a model | ✅ `20260920020000_run_cooldown.sql` — measured: press 6 of 10 stopped |
+| One chart from live rows, axis at zero | ⛔ needs B's screen; my half is a view, unstarted pending the chart's shape |
+| CSV export of the signed-in user's own rows | ⛔ needs B's button; the query is one `select` under RLS |
+| Privacy line in the app, under 60 words | ⛔ written (`security.md` §5, 52 words); needs B to place it — the current footer is a **safety** line, not a privacy line, and the COULD asks what is stored about you and why |
+
+**A2.3 is now closed** by the cooldown migration.
+
 ## A4 — BE-1, BE-2, BE-4 · needs B's screens
 
 Data survives refresh and a private window; the app reads from the database; a
