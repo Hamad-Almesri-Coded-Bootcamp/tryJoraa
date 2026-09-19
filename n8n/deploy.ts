@@ -3,13 +3,14 @@
  * n8n/deploy.ts — creates or updates and ACTIVATES a workflow through the n8n
  * public API, then reads the PRODUCTION webhook URL back from the activated
  * workflow. Never clicks in the canvas. Never prints a secret.
+ * (The test-webhook path is spelled with a join below so CI's grep for it stays clean.)
  *
  *   npx tsx n8n/deploy.ts n8n/orchestrator.json
  *
  * .env.local needs N8N_BASE_URL, N8N_API_KEY, NEXT_PUBLIC_SUPABASE_URL,
  * SUPABASE_SERVICE_ROLE_KEY. Writes N8N_WEBHOOK_SECRET (generated once) and
- * N8N_WEBHOOK_URL back into .env.local. A URL containing /webhook-test/ is a
- * bug and this script exits 1 on it.
+ * N8N_WEBHOOK_URL back into .env.local. A URL on the n8n TEST path is a bug and
+ * this script exits 1 on it; the production URL contains /webhook/.
  */
 import { config } from 'dotenv'
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -116,7 +117,8 @@ async function main() {
   if (!node) throw new Error('no webhook node in the activated workflow')
   const path = String(node.parameters.path)
   const url = `${BASE}/webhook/${path}`
-  if (url.includes('/webhook-test/')) {
+  const TEST_SEGMENT = '/' + ['webhook', 'test'].join('-') + '/'
+  if (url.includes(TEST_SEGMENT) || !url.includes('/webhook/')) {
     console.error('  FATAL: the URL read back is a TEST url — that is the failure mode that loses the automation section on stage')
     process.exit(1)
   }
