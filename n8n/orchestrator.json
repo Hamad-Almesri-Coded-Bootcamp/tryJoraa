@@ -1,0 +1,65 @@
+{
+  "name": "jurah-orchestrator",
+  "settings": { "executionOrder": "v1" },
+  "nodes": [
+    {
+      "id": "6c1a9d3e-0001-4a7e-9f3b-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "__WEBHOOK_ID__",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jurah-orchestrator",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": { "id": "__WEBHOOK_CRED_ID__", "name": "jurah-webhook-secret" }
+      }
+    },
+    {
+      "id": "6c1a9d3e-0002-4a7e-9f3b-000000000002",
+      "name": "Placeholder result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [260, 0],
+      "parameters": {
+        "jsCode": "// PROMPT 0 placeholder. Owner C replaces this with the AI Agent node routing to the\n// three specialist sub-workflows (technical plan §7). No number is decided here (G11).\nconst body = $input.first().json.body ?? {};\nif (!body.runId) throw new Error('runId missing from webhook body');\nreturn [{ json: {\n  runId: body.runId,\n  result: {\n    _status: 'PLACEHOLDER — orchestrator not yet routing; Owner C builds the specialists',\n    kind: body.kind ?? 'check_doses',\n    run_id: body.runId,\n    checked: 0,\n    proposals: [],\n    refusals: []\n  }\n}}];"
+      }
+    },
+    {
+      "id": "6c1a9d3e-0003-4a7e-9f3b-000000000003",
+      "name": "Mark run done",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 0],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=__SUPABASE_URL__/rest/v1/runs?id=eq.{{ $json.runId }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Prefer", "value": "return=representation" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ status: 'done', finished_at: $now.toISO(), doses_checked: 0, result: $json.result }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "supabaseApi": { "id": "__SUPABASE_CRED_ID__", "name": "jurah-supabase-service" }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": { "main": [[{ "node": "Placeholder result", "type": "main", "index": 0 }]] },
+    "Placeholder result": { "main": [[{ "node": "Mark run done", "type": "main", "index": 0 }]] }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "_status": "PROVISIONAL — Owner C finalises this shape first thing Sunday. Lane B builds the result panel against it until then.",
+  "_writes_to": "runs.result (jsonb) on the row /api/runs created; runs.status becomes done or failed; runs.finished_at is set",
+  "kind": "check_doses",
+  "run_id": "3f6c1a2e-8b4d-4c1e-9a7f-2d5e6b8c9d01",
+  "checked": 2,
+  "proposals": [
+    {
+      "dose_id": "a1b2c3d4-0000-4000-8000-000000000001",
+      "medicine": "Metformin 500 mg",
+      "scheduled_at": "2026-09-19T08:00:00+03:00",
+      "proposed_at": "2026-09-19T13:30:00+03:00",
+      "guardrail": "G2",
+      "reason_en": "Your 08:00 Metformin is less than 2 hours late, so it can still be taken. Accept to move it to 13:30.",
+      "reason_ar": "جرعة الميتفورمين المقررة عند 08:00 تأخرت أقل من ساعتين، فيمكن أخذها. اقبل لنقلها إلى 13:30."
+    }
+  ],
+  "refusals": [
+    {
+      "dose_id": "a1b2c3d4-0000-4000-8000-000000000002",
+      "medicine": "Warfarin 5 mg",
+      "guardrail": "G5",
+      "reason_en": "Not moved. Warfarin is a time-critical medicine, so we never reschedule it. Your doctor has been told.",
+      "reason_ar": "لم تُنقل. الوارفارين دواء حرج التوقيت، لذا لا نعيد جدولته أبداً. تم إبلاغ طبيبك.",
+      "alert_id": "b2c3d4e5-0000-4000-8000-000000000003"
+    }
+  ]
+}
