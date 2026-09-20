@@ -2,7 +2,7 @@
 .env
 .env.*
 !.env.example
-
+AQ.Ab8RN6Jg63Nqdg4p59hXYdKYqGqzJZ44G15qgsHtd2lUhbZc0g
 # local tool state (holds session tokens)
 .gstack/
 .logs/
